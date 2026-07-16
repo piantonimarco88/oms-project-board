@@ -4,17 +4,25 @@ Strumento di project management per la valutazione di un nuovo Order Management 
 
 ## Contenuto
 
-- **`OMS_Project_Board.html`** — app locale interattiva (nessun server richiesto): Stakeholder, Sistemi & Pain Point, KPI, Roadmap, Gantt, Registro Rischi, Matrice RACI, Business Case, Vendor/Opzioni, Log Decisioni. Apri il file con un doppio click nel browser.
-- **`generate_project_pdf.py`** — genera `OMS_Project_Summary.pdf` a partire dall'ultimo backup JSON esportato dall'app (richiede `reportlab`: `pip install reportlab`).
-- **`oms_project_backup_*.json`** — ultimo export dei dati (bottone "💾 Salva Dati" nell'app). È la fonte dati per il PDF.
+- **`OMS_Project_Board.html`** — app interattiva: Stakeholder, Sistemi & Pain Point, KPI, Roadmap, Gantt, Registro Rischi, Matrice RACI, Business Case, Vendor/Opzioni, Log Decisioni. Aggiungere/rimuovere uno Stakeholder aggiorna automaticamente l'elenco nomi selezionabile in tutti i menu owner (KPI, Roadmap, Rischi, RACI).
+- **`oms_project_data.json`** — dati "pubblicati": è il file che l'app carica automaticamente quando viene aperta dal link GitHub Pages (vedi sotto). Va tenuto aggiornato manualmente quando si vuole condividere un nuovo stato.
+- **`oms_project_backup_*.json`** — export puntuali con data (bottone "💾 Salva Dati" nell'app), utili come cronologia/backup personale.
+- **`generate_project_pdf.py`** — genera `OMS_Project_Summary.pdf` a partire dall'ultimo backup JSON presente nella cartella (richiede `reportlab`: `pip install reportlab`).
 - **`OMS_Project_Summary.pdf`** — riepilogo stampabile generato dallo script.
 
 ## Come usarlo
 
-1. Apri `OMS_Project_Board.html` nel browser. I dati che modifichi si salvano automaticamente nel tuo browser (localStorage) — **restano locali al tuo dispositivo**, non si sincronizzano automaticamente con GitHub.
-2. Per allineare il tuo stato a quello più recente condiviso qui: apri l'app, clicca **"📂 Carica Dati Salvati"** e seleziona il file `oms_project_backup_*.json` più recente presente in questo repository.
-3. Per condividere un aggiornamento con gli altri: nell'app clicca **"💾 Salva Dati (backup)"**, poi fai il commit/push del nuovo file JSON generato (sostituendo o affiancando quello precedente).
-4. Per rigenerare il PDF dopo un aggiornamento dati: `python generate_project_pdf.py` (usa automaticamente il backup JSON più recente nella cartella).
+**Link diretto (consigliato per i colleghi):** https://piantonimarco88.github.io/oms-project-board/
+Chi apre questo link vede automaticamente lo stato pubblicato in `oms_project_data.json` — **nessun passaggio manuale richiesto**. Se ha già aperto l'app in precedenza dallo stesso browser, restano invece le sue modifiche locali (localStorage ha sempre priorità, così non si perde lavoro in corso).
+
+**Se apri il file in locale** (doppio click su `OMS_Project_Board.html`): i dati che modifichi si salvano nel tuo browser (localStorage) e restano locali al tuo dispositivo — non si sincronizzano da soli con GitHub.
+
+**Per pubblicare un aggiornamento visibile a tutti sul link GitHub Pages:**
+1. Nell'app, clicca **"💾 Salva Dati (backup)"** → scarica un nuovo `oms_project_backup_<data>.json`.
+2. Sostituisci il contenuto di `oms_project_data.json` con quello del nuovo export (stesso nome file, stesso posto).
+3. Fai commit/push. Dopo qualche minuto (tempo di build di GitHub Pages) chiunque apra il link vede lo stato aggiornato, senza dover importare nulla manualmente.
+
+**Per rigenerare il PDF** dopo un aggiornamento dati: `python generate_project_pdf.py` (usa automaticamente il backup JSON più recente nella cartella).
 
 ## Nota
 

@@ -370,7 +370,26 @@
 </div>
 
 <script>
-const OWNERS = ["Paolo Zanco","Luigi Barra","Marco Benasedo","Raul Simon","Alberto Sala","Claudia Sogus","Maja Sztekiel","Eugenio Frescura","Marco Piantoni"];
+// Il pool nomi non e' piu' fisso: viene ricavato dalla tabella Stakeholder
+// (vedi syncOwnersFromStakeholders) cosi' aggiungere/rimuovere uno stakeholder
+// aggiorna automaticamente tutti i menu owner dell'app.
+let OWNERS = [];
+
+// Dati condivisi pubblicati su GitHub Pages (oms_project_data.json, stesso repository):
+// se il file e' raggiungibile (sito pubblicato), fa da base per i visitatori che aprono
+// l'app per la prima volta (nessun dato ancora salvato nel loro browser). Chi ha gia'
+// dati locali (localStorage) non viene toccato: quelli restano sempre la fonte primaria.
+// Aperta come file locale (file://) la richiesta fallisce silenziosamente e si prosegue
+// con il comportamento di sempre (localStorage + default incorporati).
+let SHARED_DATA = null;
+try{
+  const xhr = new XMLHttpRequest();
+  xhr.open("GET", "oms_project_data.json", false);
+  xhr.send(null);
+  if(xhr.status === 200 && xhr.responseText){
+    SHARED_DATA = JSON.parse(xhr.responseText);
+  }
+}catch(e){ /* file:// o file non pubblicato: si ignora e si usano i fallback abituali */ }
 
 function escapeHtml(str){
   return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -638,12 +657,29 @@ function loadStakeholders(){
     const saved = JSON.parse(localStorage.getItem(STAKEHOLDER_KEY));
     if(Array.isArray(saved) && saved.length) return saved;
   }catch(e){}
+  if(SHARED_DATA && Array.isArray(SHARED_DATA.stakeholders) && SHARED_DATA.stakeholders.length){
+    return SHARED_DATA.stakeholders;
+  }
   return JSON.parse(JSON.stringify(DEFAULT_STAKEHOLDERS));
 }
 function saveStakeholders(){ localStorage.setItem(STAKEHOLDER_KEY, JSON.stringify(stakeholderData)); }
 let stakeholderData = loadStakeholders();
+
+// Ricalcola il pool OWNERS dai nomi correnti degli stakeholder (in-place: la stessa
+// istanza di array e' gia' referenziata da tutte le colonne "picker" di ogni tabella).
+function syncOwnersFromStakeholders(){
+  const names = stakeholderData.map(s => (s.nome || "").trim()).filter(Boolean);
+  OWNERS.splice(0, OWNERS.length, ...names);
+}
+
 function renderStakeholderTable(){
+  syncOwnersFromStakeholders();
   renderEditableTable("stakeholder-body", stakeholderData, STAKEHOLDER_COLUMNS, "stakeholder", saveStakeholders, renderStakeholderTable);
+  // Il pool nomi puo' essere cambiato: rinfresca i menu owner nelle altre sezioni.
+  renderKpiTable();
+  renderRoadmapTable();
+  renderRiskTable();
+  renderRaciTable();
 }
 registerTable("stakeholder", {
   getData: () => stakeholderData,
@@ -674,6 +710,9 @@ function loadSistemi(){
     const saved = JSON.parse(localStorage.getItem(SISTEMI_KEY));
     if(Array.isArray(saved) && saved.length) return saved;
   }catch(e){}
+  if(SHARED_DATA && Array.isArray(SHARED_DATA.sistemi) && SHARED_DATA.sistemi.length){
+    return SHARED_DATA.sistemi;
+  }
   return JSON.parse(JSON.stringify(DEFAULT_SISTEMI));
 }
 function saveSistemi(){ localStorage.setItem(SISTEMI_KEY, JSON.stringify(sistemiData)); }
@@ -723,8 +762,12 @@ function loadKpiData(){
     const saved = JSON.parse(localStorage.getItem(KPI_STORAGE_KEY));
     if(Array.isArray(saved) && saved.length) return saved;
   }catch(e){}
-  // Prima esecuzione dopo l'aggiornamento: riparte dai default, recuperando eventuali
-  // assegnazioni owner gia' fatte con il vecchio formato "solo assegnazioni".
+  if(SHARED_DATA && Array.isArray(SHARED_DATA.kpis) && SHARED_DATA.kpis.length){
+    return SHARED_DATA.kpis;
+  }
+  // Prima esecuzione in assoluto (nessun localStorage, nessun dato condiviso): riparte dai
+  // default, recuperando eventuali assegnazioni owner gia' fatte con il vecchio formato
+  // "solo assegnazioni".
   let legacyOwners = {};
   try{ legacyOwners = JSON.parse(localStorage.getItem(LEGACY_OWNER_KEY)) || {}; }catch(e){}
   return DEFAULT_KPIS.map(k => ({...k, owners: legacyOwners[k.id] || []}));
@@ -770,6 +813,9 @@ function loadRoadmap(){
     const saved = JSON.parse(localStorage.getItem(ROADMAP_KEY));
     if(Array.isArray(saved) && saved.length) return saved;
   }catch(e){}
+  if(SHARED_DATA && Array.isArray(SHARED_DATA.roadmap) && SHARED_DATA.roadmap.length){
+    return SHARED_DATA.roadmap;
+  }
   return JSON.parse(JSON.stringify(DEFAULT_ROADMAP));
 }
 function saveRoadmap(){ localStorage.setItem(ROADMAP_KEY, JSON.stringify(roadmapData)); }
@@ -813,6 +859,9 @@ function loadRisks(){
     const saved = JSON.parse(localStorage.getItem(RISK_KEY));
     if(Array.isArray(saved) && saved.length) return saved;
   }catch(e){}
+  if(SHARED_DATA && Array.isArray(SHARED_DATA.risks) && SHARED_DATA.risks.length){
+    return SHARED_DATA.risks;
+  }
   return JSON.parse(JSON.stringify(DEFAULT_RISKS));
 }
 function saveRisks(){ localStorage.setItem(RISK_KEY, JSON.stringify(riskData)); }
@@ -851,6 +900,9 @@ function loadRaci(){
     const saved = JSON.parse(localStorage.getItem(RACI_KEY));
     if(Array.isArray(saved) && saved.length) return saved;
   }catch(e){}
+  if(SHARED_DATA && Array.isArray(SHARED_DATA.raci) && SHARED_DATA.raci.length){
+    return SHARED_DATA.raci;
+  }
   return JSON.parse(JSON.stringify(DEFAULT_RACI));
 }
 function saveRaci(){ localStorage.setItem(RACI_KEY, JSON.stringify(raciData)); }
@@ -892,6 +944,9 @@ function loadBusiness(){
     const saved = JSON.parse(localStorage.getItem(BUSINESS_KEY));
     if(Array.isArray(saved) && saved.length) return saved;
   }catch(e){}
+  if(SHARED_DATA && Array.isArray(SHARED_DATA.business) && SHARED_DATA.business.length){
+    return SHARED_DATA.business;
+  }
   return JSON.parse(JSON.stringify(DEFAULT_BUSINESS));
 }
 function saveBusiness(){ localStorage.setItem(BUSINESS_KEY, JSON.stringify(businessData)); }
@@ -929,6 +984,9 @@ function loadVendors(){
     const saved = JSON.parse(localStorage.getItem(VENDOR_KEY));
     if(Array.isArray(saved) && saved.length) return saved;
   }catch(e){}
+  if(SHARED_DATA && Array.isArray(SHARED_DATA.vendor) && SHARED_DATA.vendor.length){
+    return SHARED_DATA.vendor;
+  }
   return JSON.parse(JSON.stringify(DEFAULT_VENDORS));
 }
 function saveVendors(){ localStorage.setItem(VENDOR_KEY, JSON.stringify(vendorData)); }
