@@ -384,7 +384,9 @@ let OWNERS = [];
 let SHARED_DATA = null;
 try{
   const xhr = new XMLHttpRequest();
-  xhr.open("GET", "oms_project_data.json", false);
+  // Query string variabile per evitare che il browser (o la CDN di GitHub Pages) serva
+  // una copia in cache: cosi' un refresh mostra sempre l'ultima versione pubblicata.
+  xhr.open("GET", "oms_project_data.json?_=" + Date.now(), false);
   xhr.send(null);
   if(xhr.status === 200 && xhr.responseText){
     SHARED_DATA = JSON.parse(xhr.responseText);
