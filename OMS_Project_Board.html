@@ -192,6 +192,23 @@
     .tab-btn{padding:6px 9px; font-size:0.7rem;}
     .gantt-grid{grid-template-columns:220px minmax(0,1fr);}
   }
+
+  /* Modalita' sola lettura (versione pubblicata su GitHub Pages): nessun controllo di
+     modifica visibile, i campi restano leggibili ma non interagibili. */
+  .view-only-banner{display:none;}
+  body.view-only .view-only-banner{
+    display:block; background:#fdf1de; border:1px solid #f0d8ad; color:#7a5b12;
+    padding:10px 16px; border-radius:8px; margin-bottom:16px; font-size:0.85rem; font-weight:600;
+  }
+  body.view-only .add-row-btn,
+  body.view-only .toolbar-btn.save,
+  body.view-only .toolbar-btn.load,
+  body.view-only .note.no-print{
+    display:none !important;
+  }
+  body.view-only .edit-input[readonly]{background:transparent; border-color:transparent; cursor:default;}
+  body.view-only .edit-select:disabled{background:transparent; border-color:transparent; color:var(--text); opacity:1; appearance:none; -webkit-appearance:none; cursor:default;}
+  body.view-only input[type="date"][readonly]{cursor:default;}
 </style>
 </head>
 <body>
@@ -204,6 +221,8 @@
 </div>
 
 <div class="wrap">
+
+  <div class="view-only-banner">🔒 Versione pubblicata — sola lettura. Le modifiche vanno fatte nel file locale.</div>
 
   <header>
     <div>
@@ -375,10 +394,7 @@
 // aggiorna automaticamente tutti i menu owner dell'app.
 let OWNERS = [];
 
-// Dati condivisi pubblicati su GitHub Pages (oms_project_data.json, stesso repository):
-// se il file e' raggiungibile (sito pubblicato), fa da base per i visitatori che aprono
-// l'app per la prima volta (nessun dato ancora salvato nel loro browser). Chi ha gia'
-// dati locali (localStorage) non viene toccato: quelli restano sempre la fonte primaria.
+// Dati condivisi pubblicati su GitHub Pages (oms_project_data.json, stesso repository).
 // Aperta come file locale (file://) la richiesta fallisce silenziosamente e si prosegue
 // con il comportamento di sempre (localStorage + default incorporati).
 let SHARED_DATA = null;
@@ -392,6 +408,28 @@ try{
     SHARED_DATA = JSON.parse(xhr.responseText);
   }
 }catch(e){ /* file:// o file non pubblicato: si ignora e si usano i fallback abituali */ }
+
+// Sulla versione pubblicata (GitHub Pages) l'app e' di sola lettura: i dati pubblicati
+// vincono sempre su eventuali modifiche locali di chi la visita, e tutti i controlli di
+// modifica (campi, menu, pulsanti aggiungi/elimina) sono disattivati. In locale (file://)
+// resta invece pienamente editabile come prima.
+const VIEW_ONLY = location.hostname.endsWith("github.io");
+if(VIEW_ONLY) document.body.classList.add("view-only");
+
+// Sceglie la fonte dato: in VIEW_ONLY salta il localStorage e usa sempre il dato condiviso;
+// altrimenti da' priorita' al localStorage (il proprio lavoro locale) sul dato condiviso.
+// Ritorna null se nessuna delle due fonti ha dati validi, cosi' il chiamante puo' usare
+// i propri default.
+function pickSharedOrLocal(storageKey, sharedArray){
+  if(!VIEW_ONLY){
+    try{
+      const saved = JSON.parse(localStorage.getItem(storageKey));
+      if(Array.isArray(saved) && saved.length) return saved;
+    }catch(e){}
+  }
+  if(Array.isArray(sharedArray) && sharedArray.length) return sharedArray;
+  return null;
+}
 
 function escapeHtml(str){
   return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -464,6 +502,10 @@ function buildOwnerChipsHtml(values){
 
 function buildMultiPicker(kind, id, field, selected, optionsList){
   const sel = selected || [];
+  // Versione pubblicata (sola lettura): solo le etichette, nessun menu apribile.
+  if(VIEW_ONLY){
+    return `<div class="owner-chips">${buildOwnerChipsHtml(sel)}</div>`;
+  }
   const options = optionsList.map(o => {
     const c = personColor(o);
     const dot = c ? `<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${c.text}; flex-shrink:0;"></span>` : "";
@@ -551,18 +593,22 @@ function deleteRow(kind, id){
 // ---- Motore generico di tabella editabile (colonne configurabili) ----
 function buildFieldCell(col, item, id){
   const val = item[col.field] ?? "";
+  // In sola lettura: readonly su testo/data (il contenuto resta leggibile/selezionabile,
+  // solo non modificabile); disabled sulle select (le uniche per cui readonly non esiste).
+  const roAttr = VIEW_ONLY ? " readonly" : "";
+  const disAttr = VIEW_ONLY ? " disabled" : "";
   if(col.type === "text" || col.type === "textarea"){
     const rows = col.type === "textarea" ? 2 : 1;
-    return `<textarea rows="${rows}" class="edit-input" data-field="${col.field}" data-id="${id}">${escapeHtml(val)}</textarea>`;
+    return `<textarea rows="${rows}" class="edit-input" data-field="${col.field}" data-id="${id}"${roAttr}>${escapeHtml(val)}</textarea>`;
   }
   if(col.type === "date"){
-    return `<input type="date" class="edit-input" value="${escapeHtml(val)}" data-field="${col.field}" data-id="${id}">`;
+    return `<input type="date" class="edit-input" value="${escapeHtml(val)}" data-field="${col.field}" data-id="${id}"${roAttr}>`;
   }
   if(col.type === "select"){
     const opts = Object.keys(col.options).map(k =>
       `<option value="${k}" ${val === k ? "selected" : ""}>${col.options[k]}</option>`
     ).join("");
-    return `<select class="edit-select" data-field="${col.field}" data-id="${id}">${opts}</select>`;
+    return `<select class="edit-select" data-field="${col.field}" data-id="${id}"${disAttr}>${opts}</select>`;
   }
   return "";
 }
@@ -655,13 +701,8 @@ const STAKEHOLDER_COLUMNS = [
   {field:"coinvolgimento", label:"Coinvolgimento nel progetto", type:"textarea", width:"54%"}
 ];
 function loadStakeholders(){
-  try{
-    const saved = JSON.parse(localStorage.getItem(STAKEHOLDER_KEY));
-    if(Array.isArray(saved) && saved.length) return saved;
-  }catch(e){}
-  if(SHARED_DATA && Array.isArray(SHARED_DATA.stakeholders) && SHARED_DATA.stakeholders.length){
-    return SHARED_DATA.stakeholders;
-  }
+  const picked = pickSharedOrLocal(STAKEHOLDER_KEY, SHARED_DATA && SHARED_DATA.stakeholders);
+  if(picked) return picked;
   return JSON.parse(JSON.stringify(DEFAULT_STAKEHOLDERS));
 }
 function saveStakeholders(){ localStorage.setItem(STAKEHOLDER_KEY, JSON.stringify(stakeholderData)); }
@@ -676,7 +717,7 @@ function syncOwnersFromStakeholders(){
 
 function renderStakeholderTable(){
   syncOwnersFromStakeholders();
-  renderEditableTable("stakeholder-body", stakeholderData, STAKEHOLDER_COLUMNS, "stakeholder", saveStakeholders, renderStakeholderTable);
+  renderEditableTable("stakeholder-body", stakeholderData, STAKEHOLDER_COLUMNS, "stakeholder", saveStakeholders, renderStakeholderTable, {noDelete: VIEW_ONLY});
   // Il pool nomi puo' essere cambiato: rinfresca i menu owner nelle altre sezioni.
   renderKpiTable();
   renderRoadmapTable();
@@ -708,19 +749,14 @@ const SISTEMI_COLUMNS = [
   {field:"ruolo", label:"Ruolo nel flusso", type:"textarea", width:"66%"}
 ];
 function loadSistemi(){
-  try{
-    const saved = JSON.parse(localStorage.getItem(SISTEMI_KEY));
-    if(Array.isArray(saved) && saved.length) return saved;
-  }catch(e){}
-  if(SHARED_DATA && Array.isArray(SHARED_DATA.sistemi) && SHARED_DATA.sistemi.length){
-    return SHARED_DATA.sistemi;
-  }
+  const picked = pickSharedOrLocal(SISTEMI_KEY, SHARED_DATA && SHARED_DATA.sistemi);
+  if(picked) return picked;
   return JSON.parse(JSON.stringify(DEFAULT_SISTEMI));
 }
 function saveSistemi(){ localStorage.setItem(SISTEMI_KEY, JSON.stringify(sistemiData)); }
 let sistemiData = loadSistemi();
 function renderSistemiTable(){
-  renderEditableTable("sistemi-body", sistemiData, SISTEMI_COLUMNS, "sistemi", saveSistemi, renderSistemiTable);
+  renderEditableTable("sistemi-body", sistemiData, SISTEMI_COLUMNS, "sistemi", saveSistemi, renderSistemiTable, {noDelete: VIEW_ONLY});
 }
 registerTable("sistemi", {
   getData: () => sistemiData,
@@ -760,13 +796,8 @@ const KPI_COLUMNS = [
   {field:"deadline", label:"Deadline", type:"text", width:"8%"}
 ];
 function loadKpiData(){
-  try{
-    const saved = JSON.parse(localStorage.getItem(KPI_STORAGE_KEY));
-    if(Array.isArray(saved) && saved.length) return saved;
-  }catch(e){}
-  if(SHARED_DATA && Array.isArray(SHARED_DATA.kpis) && SHARED_DATA.kpis.length){
-    return SHARED_DATA.kpis;
-  }
+  const picked = pickSharedOrLocal(KPI_STORAGE_KEY, SHARED_DATA && SHARED_DATA.kpis);
+  if(picked) return picked;
   // Prima esecuzione in assoluto (nessun localStorage, nessun dato condiviso): riparte dai
   // default, recuperando eventuali assegnazioni owner gia' fatte con il vecchio formato
   // "solo assegnazioni".
@@ -777,7 +808,7 @@ function loadKpiData(){
 function saveKpiData(){ localStorage.setItem(KPI_STORAGE_KEY, JSON.stringify(kpiData)); }
 let kpiData = loadKpiData();
 function renderKpiTable(){
-  renderEditableTable("kpi-body", kpiData, KPI_COLUMNS, "kpi", saveKpiData, renderKpiTable);
+  renderEditableTable("kpi-body", kpiData, KPI_COLUMNS, "kpi", saveKpiData, renderKpiTable, {noDelete: VIEW_ONLY});
 }
 registerTable("kpi", {
   getData: () => kpiData,
@@ -811,19 +842,14 @@ const ROADMAP_COLUMNS = [
   {field:"status", label:"Stato", type:"select", options: STATUS_LABELS, width:"11%"}
 ];
 function loadRoadmap(){
-  try{
-    const saved = JSON.parse(localStorage.getItem(ROADMAP_KEY));
-    if(Array.isArray(saved) && saved.length) return saved;
-  }catch(e){}
-  if(SHARED_DATA && Array.isArray(SHARED_DATA.roadmap) && SHARED_DATA.roadmap.length){
-    return SHARED_DATA.roadmap;
-  }
+  const picked = pickSharedOrLocal(ROADMAP_KEY, SHARED_DATA && SHARED_DATA.roadmap);
+  if(picked) return picked;
   return JSON.parse(JSON.stringify(DEFAULT_ROADMAP));
 }
 function saveRoadmap(){ localStorage.setItem(ROADMAP_KEY, JSON.stringify(roadmapData)); }
 let roadmapData = loadRoadmap();
 function renderRoadmapTable(){
-  renderEditableTable("roadmap-body", roadmapData, ROADMAP_COLUMNS, "roadmap", saveRoadmap, renderRoadmapTable);
+  renderEditableTable("roadmap-body", roadmapData, ROADMAP_COLUMNS, "roadmap", saveRoadmap, renderRoadmapTable, {noDelete: VIEW_ONLY});
 }
 registerTable("roadmap", {
   getData: () => roadmapData,
@@ -857,19 +883,14 @@ const RISK_COLUMNS = [
   {field:"stato", label:"Stato", type:"select", options: RISK_STATUS_LABELS, width:"8%"}
 ];
 function loadRisks(){
-  try{
-    const saved = JSON.parse(localStorage.getItem(RISK_KEY));
-    if(Array.isArray(saved) && saved.length) return saved;
-  }catch(e){}
-  if(SHARED_DATA && Array.isArray(SHARED_DATA.risks) && SHARED_DATA.risks.length){
-    return SHARED_DATA.risks;
-  }
+  const picked = pickSharedOrLocal(RISK_KEY, SHARED_DATA && SHARED_DATA.risks);
+  if(picked) return picked;
   return JSON.parse(JSON.stringify(DEFAULT_RISKS));
 }
 function saveRisks(){ localStorage.setItem(RISK_KEY, JSON.stringify(riskData)); }
 let riskData = loadRisks();
 function renderRiskTable(){
-  renderEditableTable("risk-body", riskData, RISK_COLUMNS, "risk", saveRisks, renderRiskTable);
+  renderEditableTable("risk-body", riskData, RISK_COLUMNS, "risk", saveRisks, renderRiskTable, {noDelete: VIEW_ONLY});
 }
 registerTable("risk", {
   getData: () => riskData,
@@ -898,19 +919,14 @@ const RACI_COLUMNS = [
   {field:"informed", label:"I — Informed", type:"picker", options: OWNERS, width:"15%"}
 ];
 function loadRaci(){
-  try{
-    const saved = JSON.parse(localStorage.getItem(RACI_KEY));
-    if(Array.isArray(saved) && saved.length) return saved;
-  }catch(e){}
-  if(SHARED_DATA && Array.isArray(SHARED_DATA.raci) && SHARED_DATA.raci.length){
-    return SHARED_DATA.raci;
-  }
+  const picked = pickSharedOrLocal(RACI_KEY, SHARED_DATA && SHARED_DATA.raci);
+  if(picked) return picked;
   return JSON.parse(JSON.stringify(DEFAULT_RACI));
 }
 function saveRaci(){ localStorage.setItem(RACI_KEY, JSON.stringify(raciData)); }
 let raciData = loadRaci();
 function renderRaciTable(){
-  renderEditableTable("raci-body", raciData, RACI_COLUMNS, "raci", saveRaci, renderRaciTable);
+  renderEditableTable("raci-body", raciData, RACI_COLUMNS, "raci", saveRaci, renderRaciTable, {noDelete: VIEW_ONLY});
 }
 registerTable("raci", {
   getData: () => raciData,
@@ -942,19 +958,14 @@ const BUSINESS_COLUMNS = [
   {field:"tobe", label:"To-Be (con nuovo OMS)", type:"text", width:"27%"}
 ];
 function loadBusiness(){
-  try{
-    const saved = JSON.parse(localStorage.getItem(BUSINESS_KEY));
-    if(Array.isArray(saved) && saved.length) return saved;
-  }catch(e){}
-  if(SHARED_DATA && Array.isArray(SHARED_DATA.business) && SHARED_DATA.business.length){
-    return SHARED_DATA.business;
-  }
+  const picked = pickSharedOrLocal(BUSINESS_KEY, SHARED_DATA && SHARED_DATA.business);
+  if(picked) return picked;
   return JSON.parse(JSON.stringify(DEFAULT_BUSINESS));
 }
 function saveBusiness(){ localStorage.setItem(BUSINESS_KEY, JSON.stringify(businessData)); }
 let businessData = loadBusiness();
 function renderBusinessTable(){
-  renderEditableTable("business-body", businessData, BUSINESS_COLUMNS, "business", saveBusiness, renderBusinessTable);
+  renderEditableTable("business-body", businessData, BUSINESS_COLUMNS, "business", saveBusiness, renderBusinessTable, {noDelete: VIEW_ONLY});
 }
 registerTable("business", {
   getData: () => businessData,
@@ -982,19 +993,14 @@ const VENDOR_COLUMNS = [
   {field:"stato", label:"Stato Valutazione", type:"select", options: VENDOR_STATUS_LABELS, width:"14%"}
 ];
 function loadVendors(){
-  try{
-    const saved = JSON.parse(localStorage.getItem(VENDOR_KEY));
-    if(Array.isArray(saved) && saved.length) return saved;
-  }catch(e){}
-  if(SHARED_DATA && Array.isArray(SHARED_DATA.vendor) && SHARED_DATA.vendor.length){
-    return SHARED_DATA.vendor;
-  }
+  const picked = pickSharedOrLocal(VENDOR_KEY, SHARED_DATA && SHARED_DATA.vendor);
+  if(picked) return picked;
   return JSON.parse(JSON.stringify(DEFAULT_VENDORS));
 }
 function saveVendors(){ localStorage.setItem(VENDOR_KEY, JSON.stringify(vendorData)); }
 let vendorData = loadVendors();
 function renderVendorTable(){
-  renderEditableTable("vendor-body", vendorData, VENDOR_COLUMNS, "vendor", saveVendors, renderVendorTable);
+  renderEditableTable("vendor-body", vendorData, VENDOR_COLUMNS, "vendor", saveVendors, renderVendorTable, {noDelete: VIEW_ONLY});
 }
 registerTable("vendor", {
   getData: () => vendorData,
@@ -1007,14 +1013,14 @@ registerTable("vendor", {
 });
 
 // ---- Inizializzazione: header colonne + prima renderizzazione di tutte le tabelle ----
-renderTableHead("stakeholder-head", STAKEHOLDER_COLUMNS);
-renderTableHead("sistemi-head", SISTEMI_COLUMNS);
-renderTableHead("kpi-head", KPI_COLUMNS);
-renderTableHead("roadmap-head", ROADMAP_COLUMNS);
-renderTableHead("risk-head", RISK_COLUMNS);
-renderTableHead("raci-head", RACI_COLUMNS);
-renderTableHead("business-head", BUSINESS_COLUMNS);
-renderTableHead("vendor-head", VENDOR_COLUMNS);
+renderTableHead("stakeholder-head", STAKEHOLDER_COLUMNS, {noDelete: VIEW_ONLY});
+renderTableHead("sistemi-head", SISTEMI_COLUMNS, {noDelete: VIEW_ONLY});
+renderTableHead("kpi-head", KPI_COLUMNS, {noDelete: VIEW_ONLY});
+renderTableHead("roadmap-head", ROADMAP_COLUMNS, {noDelete: VIEW_ONLY});
+renderTableHead("risk-head", RISK_COLUMNS, {noDelete: VIEW_ONLY});
+renderTableHead("raci-head", RACI_COLUMNS, {noDelete: VIEW_ONLY});
+renderTableHead("business-head", BUSINESS_COLUMNS, {noDelete: VIEW_ONLY});
+renderTableHead("vendor-head", VENDOR_COLUMNS, {noDelete: VIEW_ONLY});
 
 renderStakeholderTable();
 renderSistemiTable();
