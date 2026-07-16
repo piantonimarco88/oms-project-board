@@ -1,0 +1,6 @@
+# Corrispondenza email originale: contiene dati personali (numero di cellulare diretto,
+# firme complete) non destinati alla condivisione pubblica.
+*.eml
+
+__pycache__/
+*.pyc

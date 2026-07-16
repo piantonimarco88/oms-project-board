@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OMS — Project Board</title>
+<style>
+  :root{
+    --navy:#18376a; --navy-dark:#0f2547; --gray-bg:#f4f6f9; --gray-border:#dfe4ec;
+    --text:#22293b; --text-light:#5b6479; --amber:#c98a1f; --green:#2f8a4e; --red:#b9433f;
+    --white:#ffffff;
+  }
+  *{box-sizing:border-box;}
+  /* Riserva sempre lo spazio della scrollbar verticale: senza questo, passare da un tab
+     corto (senza scroll) a uno lungo (con scroll) fa "muovere" il contenuto orizzontalmente. */
+  html{overflow-y:scroll;}
+  body{
+    font-family:"Segoe UI", Calibri, Aptos, Arial, sans-serif;
+    margin:0; padding:32px; background:var(--gray-bg); color:var(--text); line-height:1.5;
+  }
+  .wrap{max-width:1180px; margin:0 auto;}
+  header{
+    background:linear-gradient(135deg, var(--navy), var(--navy-dark));
+    color:#fff; padding:28px 32px; border-radius:12px; margin-bottom:24px;
+    display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;
+  }
+  header h1{margin:0 0 6px 0; font-size:1.6rem;}
+  header p{margin:0; opacity:0.85; font-size:0.95rem;}
+  .badge{
+    display:inline-block; padding:4px 12px; border-radius:20px; font-size:0.8rem; font-weight:600;
+    background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3);
+  }
+  .meta-box{text-align:right; font-size:0.85rem;}
+  section{
+    background:var(--white); border:1px solid var(--gray-border); border-radius:10px;
+    padding:22px 26px; margin-bottom:22px;
+  }
+  section h2{
+    margin-top:0; font-size:1.15rem; color:var(--navy); border-bottom:2px solid var(--gray-border);
+    padding-bottom:10px; display:flex; align-items:center; gap:8px;
+  }
+  /* table-layout:fixed rende deterministiche le larghezze % delle colonne (vedi width nei config
+     colonna in JS); senza, il layout automatico puo' schiacciare select/date sotto il loro contenuto. */
+  table{width:100%; border-collapse:collapse; font-size:0.9rem; table-layout:fixed; min-width:760px;}
+  /* Su schermi stretti (mobile) le tabelle scorrono in orizzontale invece di schiacciare le colonne
+     fino a renderle illeggibili o tagliate. */
+  .table-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+  th, td{padding:9px 10px; text-align:left; border-bottom:1px solid var(--gray-border); vertical-align:top;}
+  th{background:#eef1f6; color:var(--navy-dark); font-weight:600; font-size:0.82rem; text-transform:uppercase; letter-spacing:0.03em;}
+  tr:hover td{background:#fafbfd;}
+  .pill{display:inline-block; padding:2px 9px; border-radius:12px; font-size:0.75rem; font-weight:600; margin:2px 3px 0 0;}
+  .pill-pending{background:#fdf1de; color:var(--amber); border:1px solid #f0d8ad;}
+  .pill-done{background:#e5f4ea; color:var(--green); border:1px solid #b9e0c6;}
+  .pill-owner{background:#e8edf7; color:var(--navy); border:1px solid #c7d3ec;}
+  .deadline-tag{font-size:0.8rem; color:var(--text-light);}
+  .status-open{color:var(--amber); font-weight:600;}
+  .status-closed{color:var(--green); font-weight:600;}
+  .note{font-size:0.82rem; color:var(--text-light); margin-top:8px;}
+  .log-entry{border-left:3px solid var(--navy); padding:8px 14px; margin-bottom:14px; background:#fafbfd; border-radius:0 6px 6px 0;}
+  .log-date{font-weight:700; color:var(--navy); font-size:0.85rem;}
+  .toolbar{position:fixed; top:10px; right:10px; z-index:99; display:flex; flex-direction:column; gap:5px;}
+  .toolbar-btn{
+    background:var(--navy); color:#fff; border:none; padding:5px 10px; border-radius:6px; cursor:pointer;
+    font-size:0.72rem; box-shadow:0 2px 6px rgba(0,0,0,0.2); text-align:left; white-space:nowrap;
+  }
+  .toolbar-btn:hover{background:var(--navy-dark);}
+  .toolbar-btn.save{background:var(--green);}
+  .toolbar-btn.save:hover{background:#256e3d;}
+  .toolbar-btn.load{background:var(--amber);}
+  .toolbar-btn.load:hover{background:#a8760f;}
+
+  .tabs{display:flex; flex-wrap:wrap; justify-content:center; gap:5px; margin-bottom:20px;}
+  .tab-btn{
+    background:var(--white); border:1px solid var(--gray-border); color:var(--navy);
+    padding:6px 10px; border-radius:7px; cursor:pointer; font-size:0.74rem; font-weight:600; white-space:nowrap;
+  }
+  .tab-btn.active{background:var(--navy); color:#fff; border-color:var(--navy);}
+  .view{display:none;}
+  .view.active{display:block;}
+
+  .gantt-legend{display:flex; gap:16px; margin-bottom:16px; font-size:0.85rem; align-items:center;}
+  .legend-swatch{display:inline-block; width:14px; height:14px; border-radius:3px; margin-right:5px; vertical-align:middle;}
+
+  /* Grid-based Gantt: label e track sono celle della STESSA riga di griglia,
+     quindi restano sempre allineate anche quando il testo dell'etichetta va a capo. */
+  .gantt-grid{
+    display:grid; grid-template-columns:340px minmax(0,1fr); border:1px solid var(--gray-border);
+    border-radius:8px; overflow-x:auto;
+  }
+  .gantt-cell-label, .gantt-cell-header-label{
+    padding:6px 12px; border-bottom:1px solid var(--gray-border); border-right:1px solid var(--gray-border);
+    font-size:0.82rem; display:flex; align-items:center;
+  }
+  .gantt-cell-header-label{
+    background:#eef1f6; font-weight:700; color:var(--navy-dark); text-transform:uppercase;
+    font-size:0.75rem; letter-spacing:0.03em;
+  }
+  .gantt-cell-months{background:#eef1f6; border-bottom:1px solid var(--gray-border); display:flex; position:relative;}
+  .gantt-today-line{position:absolute; top:0; bottom:0; width:2px; background:var(--navy-dark); z-index:5; pointer-events:none;}
+  .gantt-today-label{
+    position:absolute; top:-1px; transform:translateX(-50%); background:var(--navy-dark); color:#fff;
+    font-size:0.62rem; font-weight:700; padding:1px 6px; border-radius:0 0 4px 4px; white-space:nowrap; z-index:6;
+  }
+  .gantt-month{
+    flex:1; text-align:center; font-size:0.75rem; font-weight:700; color:var(--navy-dark);
+    padding:10px 4px; border-right:1px solid var(--gray-border); text-transform:uppercase; letter-spacing:0.03em;
+  }
+  .gantt-month:last-child{border-right:none;}
+  .gantt-cell-track{position:relative; border-bottom:1px solid var(--gray-border); min-height:41px;}
+  .gantt-bar{
+    position:absolute; top:50%; transform:translateY(-50%); height:25px; border-radius:6px; font-size:0.72rem; color:#fff;
+    display:flex; align-items:center; padding:0 8px; white-space:nowrap; overflow:hidden;
+    box-shadow:0 1px 3px rgba(0,0,0,0.15);
+  }
+  .prio-alta{background:var(--red);}
+  .prio-media{background:var(--amber);}
+  .prio-bassa{background:var(--green);}
+
+  /* Tabelle editabili (motore generico: Stakeholder, Sistemi, KPI, Roadmap, Rischi, RACI, Vendor, Business Case) */
+  .edit-input, .edit-select{
+    width:100%; padding:5px 6px; border-radius:5px; border:1px solid var(--gray-border);
+    font-size:0.82rem; font-family:inherit;
+  }
+  textarea.edit-input{resize:none; overflow:hidden; line-height:1.35;}
+  .row-actions{text-align:center;}
+  .icon-btn{
+    background:none; border:1px solid var(--gray-border); border-radius:5px; cursor:pointer;
+    font-size:0.85rem; padding:4px 8px;
+  }
+  .icon-btn:hover{background:#fbe7e6; border-color:#eab6b2;}
+  .add-row-btn{
+    margin-top:12px; background:var(--navy); color:#fff; border:none; padding:8px 16px;
+    border-radius:6px; cursor:pointer; font-size:0.85rem;
+  }
+  .add-row-btn:hover{background:var(--navy-dark);}
+  .print-row{display:none;}
+
+  /* Multi-picker compatto (owner, dipendenze, ruoli RACI...): dropdown a comparsa con chip */
+  .owner-picker{position:relative;}
+  .owner-picker-btn{
+    width:100%; text-align:left; padding:5px 6px; border:1px solid var(--gray-border); border-radius:5px;
+    background:#fff; cursor:pointer; font-size:0.82rem; display:flex; justify-content:space-between;
+    align-items:flex-start; gap:6px; color:var(--text);
+  }
+  .owner-picker-btn:hover, .owner-picker-btn.open{border-color:var(--navy);}
+  .owner-picker-btn .chev{font-size:0.65rem; color:var(--text-light); flex-shrink:0; margin-top:3px;}
+  .owner-chips{display:flex; flex-wrap:wrap; gap:4px; flex:1; min-width:0;}
+  .owner-chip{
+    display:inline-block; max-width:100%; background:#e8edf7; color:var(--navy); border:1px solid #c7d3ec;
+    border-radius:10px; padding:1px 8px; font-size:0.72rem;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .owner-chip.placeholder{background:#fdf1de; color:var(--amber); border-color:#f0d8ad;}
+  .owner-picker-panel{
+    display:none; position:absolute; top:calc(100% + 4px); left:0; z-index:60; background:#fff;
+    border:1px solid var(--gray-border); border-radius:6px; box-shadow:0 8px 20px rgba(0,0,0,0.18);
+    padding:6px; min-width:210px; max-height:230px; overflow-y:auto;
+  }
+  .owner-picker-option{
+    display:flex; align-items:center; gap:7px; padding:5px 6px; font-size:0.82rem;
+    border-radius:4px; cursor:pointer; white-space:nowrap;
+  }
+  .owner-picker-option:hover{background:#eef1f6;}
+
+  @media print{
+    body{background:#fff; padding:0;}
+    .toolbar, .no-print, .tabs{display:none !important;}
+    .view{display:block !important; break-before:page;}
+    .view:first-of-type{break-before:auto;}
+    section{break-inside:avoid; border:1px solid #ccc;}
+    header{background:var(--navy) !important; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+    .screen-row{display:none !important;}
+    .print-row{display:table-row !important;}
+    table{min-width:0 !important;}
+    .table-scroll{overflow-x:visible !important;}
+  }
+
+  /* Mobile: la toolbar fissa in alto a destra coprirebbe il titolo su schermi stretti,
+     quindi torna in flusso normale sopra l'header invece che sovrapposta. */
+  @media (max-width: 700px){
+    body{padding:14px;}
+    .toolbar{
+      position:static; flex-direction:row; flex-wrap:wrap; justify-content:center;
+      margin-bottom:14px;
+    }
+    .toolbar-btn{font-size:0.7rem;}
+    header{padding:18px 16px;}
+    header h1{font-size:1.25rem;}
+    header p{font-size:0.85rem;}
+    .meta-box{text-align:left;}
+    section{padding:16px 14px;}
+    .tab-btn{padding:6px 9px; font-size:0.7rem;}
+    .gantt-grid{grid-template-columns:220px minmax(0,1fr);}
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar no-print">
+  <button class="toolbar-btn" onclick="window.print()">🖨️ Stampa / Esporta PDF</button>
+  <button class="toolbar-btn save" onclick="exportAssignments()">💾 Salva Dati (backup)</button>
+  <button class="toolbar-btn load" onclick="triggerImport()">📂 Carica Dati Salvati</button>
+  <input type="file" id="import-file-input" accept="application/json,.json" style="display:none" onchange="handleImportFile(event)">
+</div>
+
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>OMS — Valutazione Nuovo Order Management System</h1>
+      <p>Allineamento OMS e analisi KPI — Strategia Omnichannel</p>
+    </div>
+    <div class="meta-box">
+      <div class="badge">Fase: Analisi KPI &amp; Feasibility</div>
+      <p style="margin-top:8px;">Ultimo aggiornamento: <b>15/07/2026</b></p>
+      <p>Prossimo meeting: <b>WK31 (27/07–02/08/2026)</b></p>
+    </div>
+  </header>
+
+  <div class="tabs no-print">
+    <button class="tab-btn active" onclick="showView('stakeholder', this)">👥 Stakeholder</button>
+    <button class="tab-btn" onclick="showView('sistemi', this)">🖥️ Sistemi &amp; Pain Point</button>
+    <button class="tab-btn" onclick="showView('kpi', this)">📊 KPI</button>
+    <button class="tab-btn" onclick="showView('roadmap', this)">🗓️ Roadmap</button>
+    <button class="tab-btn" onclick="showView('gantt', this)">📅 Gantt</button>
+    <button class="tab-btn" onclick="showView('risk', this)">⚠️ Rischi</button>
+    <button class="tab-btn" onclick="showView('raci', this)">🧭 RACI</button>
+    <button class="tab-btn" onclick="showView('business', this)">💰 Business Case</button>
+    <button class="tab-btn" onclick="showView('vendor', this)">🏷️ Vendor</button>
+    <button class="tab-btn" onclick="showView('log', this)">📝 Log Decisioni</button>
+  </div>
+
+  <div id="stakeholder-view" class="view active">
+  <section>
+    <h2>👥 Stakeholder</h2>
+    <p class="note no-print">Modifica direttamente nome, ruolo e coinvolgimento. Usa "+ Aggiungi Stakeholder" per nuove righe e 🗑️ per eliminarle.</p>
+    <div class="table-scroll"><table>
+      <thead><tr id="stakeholder-head"></tr></thead>
+      <tbody id="stakeholder-body"><!-- rows injected by JS --></tbody>
+    </table></div>
+    <button class="add-row-btn no-print" onclick="addRow('stakeholder')">+ Aggiungi Stakeholder</button>
+  </section>
+  </div><!-- /stakeholder-view -->
+
+  <div id="sistemi-view" class="view">
+  <section>
+    <h2>🖥️ Sistemi Attuali &amp; Pain Point</h2>
+    <p class="note no-print">Modifica direttamente sistema e ruolo nel flusso. Usa "+ Aggiungi Sistema" per nuove righe e 🗑️ per eliminarle.</p>
+    <div class="table-scroll"><table>
+      <thead><tr id="sistemi-head"></tr></thead>
+      <tbody id="sistemi-body"><!-- rows injected by JS --></tbody>
+    </table></div>
+    <button class="add-row-btn no-print" onclick="addRow('sistemi')">+ Aggiungi Sistema</button>
+    <p class="note">Pain point identificati (fonte: proposta KPI di Eugenio Frescura, mail 13/07/2026): overselling, latenza sync inventario, disallineamento stock teorico/fisico, split order, rifiuti store, routing time elevato, lead time lungo, alto tasso di interventi manuali, OTIF sotto target.</p>
+  </section>
+  </div><!-- /sistemi-view -->
+
+  <div id="kpi-view" class="view">
+  <section>
+    <h2>📊 KPI &amp; Assegnazione Owner</h2>
+    <p class="note no-print">Modifica area, KPI, formula, fonte, baseline/target, owner e deadline. Usa "+ Aggiungi KPI" per nuove righe e 🗑️ per eliminarle. Tutto si salva automaticamente.</p>
+    <div class="table-scroll"><table>
+      <thead><tr id="kpi-head"></tr></thead>
+      <tbody id="kpi-body"><!-- rows injected by JS --></tbody>
+    </table></div>
+    <button class="add-row-btn no-print" onclick="addRow('kpi')">+ Aggiungi KPI</button>
+  </section>
+  </div><!-- /kpi-view -->
+
+  <div id="roadmap-view" class="view">
+  <section>
+    <h2>🗓️ Roadmap / Action Plan</h2>
+    <p class="note no-print">Modifica attività, owner, dipendenze, priorità, date e stato. Usa "+ Aggiungi Attività" per nuove righe e 🗑️ per eliminarle. Tutto si riflette anche nella Vista Gantt. Nota: "Dipende da" fa riferimento al nome dell'attività — se rinomini un'attività, aggiorna anche le dipendenze che la referenziano.</p>
+    <div class="table-scroll"><table>
+      <thead><tr id="roadmap-head"></tr></thead>
+      <tbody id="roadmap-body"><!-- rows injected by JS --></tbody>
+    </table></div>
+    <button class="add-row-btn no-print" onclick="addRow('roadmap')">+ Aggiungi Attività</button>
+  </section>
+  </div><!-- /roadmap-view -->
+
+  <div id="gantt-view" class="view">
+    <section>
+      <h2>📅 Gantt — Attività, Priorità, Scadenze, Assegnazioni</h2>
+      <div class="gantt-legend">
+        <span><span class="legend-swatch" style="background:var(--red);"></span>Priorità Alta</span>
+        <span><span class="legend-swatch" style="background:var(--amber);"></span>Priorità Media</span>
+        <span><span class="legend-swatch" style="background:var(--green);"></span>Priorità Bassa</span>
+      </div>
+      <div class="gantt-grid" id="gantt-grid"></div>
+      <p class="note">Le barre rappresentano l'intervallo di svolgimento di ciascuna attività, definito nella Vista Roadmap (colonne Inizio/Fine). Modifica le date lì per aggiornare automaticamente questo Gantt.</p>
+    </section>
+  </div><!-- /gantt-view -->
+
+  <div id="risk-view" class="view">
+  <section>
+    <h2>⚠️ Registro Rischi</h2>
+    <p class="note no-print">Rischi/assunzioni del progetto, con impatto, probabilità, mitigazione e owner. Usa "+ Aggiungi Rischio" per nuove righe e 🗑️ per eliminarle.</p>
+    <div class="table-scroll"><table>
+      <thead><tr id="risk-head"></tr></thead>
+      <tbody id="risk-body"><!-- rows injected by JS --></tbody>
+    </table></div>
+    <button class="add-row-btn no-print" onclick="addRow('risk')">+ Aggiungi Rischio</button>
+  </section>
+  </div><!-- /risk-view -->
+
+  <div id="raci-view" class="view">
+  <section>
+    <h2>🧭 Matrice RACI</h2>
+    <p class="note no-print">Per ogni decisione/area chiave: chi la esegue (R), chi ne risponde (A), chi va consultato (C), chi va informato (I). Usa "+ Aggiungi Decisione" per nuove righe e 🗑️ per eliminarle.</p>
+    <div class="table-scroll"><table>
+      <thead><tr id="raci-head"></tr></thead>
+      <tbody id="raci-body"><!-- rows injected by JS --></tbody>
+    </table></div>
+    <button class="add-row-btn no-print" onclick="addRow('raci')">+ Aggiungi Decisione</button>
+  </section>
+  </div><!-- /raci-view -->
+
+  <div id="business-view" class="view">
+  <section>
+    <h2>💰 Business Case (As-Is / To-Be)</h2>
+    <p class="note no-print">Voci CAPEX (investimento una tantum), OPEX (costi ricorrenti) e KPI economici, confrontate As-Is vs To-Be. Usa "+ Aggiungi Voce" per nuove righe e 🗑️ per eliminarle.</p>
+    <div class="table-scroll"><table>
+      <thead><tr id="business-head"></tr></thead>
+      <tbody id="business-body"><!-- rows injected by JS --></tbody>
+    </table></div>
+    <button class="add-row-btn no-print" onclick="addRow('business')">+ Aggiungi Voce</button>
+    <p class="note">Metodologia break-even (indicativa): l'investimento iniziale (CAPEX) si considera ammortizzato quando i risparmi operativi annui — differenza OPEX As-Is/To-Be più i benefici quantificabili dai KPI (es. riduzione overselling, minori interventi manuali) — superano l'investimento sostenuto. Nessuna stima numerica verrà inserita senza dati reali confermati o senza esplicita richiesta di usare benchmark di mercato.</p>
+  </section>
+  </div><!-- /business-view -->
+
+  <div id="vendor-view" class="view">
+  <section>
+    <h2>🏷️ Vendor / Opzioni OMS</h2>
+    <p class="note no-print">Confronto delle soluzioni/vendor candidati, valutati su fit funzionale, complessità di integrazione e costo. Usa "+ Aggiungi Vendor" per nuove righe e 🗑️ per eliminarle.</p>
+    <div class="table-scroll"><table>
+      <thead><tr id="vendor-head"></tr></thead>
+      <tbody id="vendor-body"><!-- rows injected by JS --></tbody>
+    </table></div>
+    <button class="add-row-btn no-print" onclick="addRow('vendor')">+ Aggiungi Vendor</button>
+  </section>
+  </div><!-- /vendor-view -->
+
+  <div id="log-view" class="view">
+  <section>
+    <h2>📝 Log Decisioni</h2>
+
+    <div class="log-entry">
+      <div class="log-date">15/07/2026</div>
+      Ristrutturata la Project Board: aggiunte le sezioni Registro Rischi, Matrice RACI e Vendor/Opzioni OMS; aggiunte colonne Baseline/Target ai KPI e Dipendenze al Roadmap; Stakeholder e Sistemi resi editabili come le altre sezioni; Business Case riorganizzato in ottica CAPEX/OPEX/KPI. Motore di tabella unificato per tutte le sezioni editabili.
+    </div>
+
+    <div class="log-entry">
+      <div class="log-date">15/07/2026</div>
+      Definito il pool di 9 risorse assegnabili come owner (KPI, Roadmap, Rischi, RACI): Paolo Zanco, Luigi Barra, Marco Benasedo, Raul Simon, Alberto Sala, Claudia Sogus, Maja Sztekiel, Eugenio Frescura, Marco Piantoni. Assegnazione riga-per-riga gestita direttamente in questa app.
+    </div>
+
+    <div class="log-entry">
+      <div class="log-date">15/07/2026</div>
+      L'assegnazione owner KPI non sarà univoca ma per singolo KPI — persone diverse possono coprire raccolta dato e calcolo/validazione a seconda dell'area. Deadline target assegnazione: entro WK30 (26/07/2026).
+    </div>
+
+    <div class="log-entry">
+      <div class="log-date">14/07/2026</div>
+      Kick-off OMS: avviata analisi KPI proposti da Eugenio Frescura. Leadership assegnata (in attesa di conferma) a Marco Piantoni, previo accordo con Paolo Zanco. Coinvolgimento di Claudia Sogus per input di business aggiuntivo.
+    </div>
+  </section>
+  </div><!-- /log-view -->
+
+</div>
+
+<script>
+const OWNERS = ["Paolo Zanco","Luigi Barra","Marco Benasedo","Raul Simon","Alberto Sala","Claudia Sogus","Maja Sztekiel","Eugenio Frescura","Marco Piantoni"];
+
+function escapeHtml(str){
+  return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// Fa crescere le textarea in altezza in base al contenuto, cosi' il testo non viene mai tagliato.
+function autoResizeTextarea(el){
+  el.style.height = "auto";
+  el.style.height = el.scrollHeight + "px";
+}
+function wireAutoResize(container){
+  container.querySelectorAll("textarea.edit-input").forEach(ta => {
+    autoResizeTextarea(ta);
+    ta.addEventListener("input", () => autoResizeTextarea(ta));
+  });
+}
+// Le textarea dentro un tab nascosto (display:none) misurano scrollHeight=0,
+// quindi vanno ricalcolate ogni volta che il tab diventa visibile.
+function resizeVisibleTextareas(container){
+  container.querySelectorAll("textarea.edit-input").forEach(autoResizeTextarea);
+}
+
+function fmtDateIt(iso){
+  if(!iso) return "-";
+  const parts = iso.split("-");
+  if(parts.length !== 3) return iso;
+  return `${parts[2]}/${parts[1]}/${parts[0]}`;
+}
+
+// ---- Mappe etichette condivise (valore memorizzato -> testo visualizzato) ----
+const LEVEL_LABELS = {alta:"Alta", media:"Media", bassa:"Bassa"};
+const PRIORITY_LABELS = LEVEL_LABELS;
+const STATUS_LABELS = {"da-avviare":"Da avviare", "in-corso":"In corso", "completato":"Completato"};
+const RISK_CATEGORY_LABELS = {tecnico:"Tecnico", organizzativo:"Organizzativo", dati:"Dati", fornitore:"Fornitore"};
+const RISK_STATUS_LABELS = {aperto:"Aperto", mitigato:"Mitigato", chiuso:"Chiuso"};
+const VENDOR_STATUS_LABELS = {"da-valutare":"Da valutare", "in-valutazione":"In valutazione", shortlist:"Shortlist", scartato:"Scartato"};
+const BC_CATEGORY_LABELS = {capex:"CAPEX", opex:"OPEX", kpi:"KPI"};
+
+// ---- Multi-picker compatto (owner, dipendenze, ruoli RACI...) ----
+// Colore fisso per persona (stessa persona = stesso colore in ogni sezione/tab).
+// Non si applica a valori che non sono nomi del pool OWNERS (es. nomi attività in "Dipende da").
+const PERSON_COLOR_PALETTE = [
+  {bg:"#e3f2fd", text:"#1565c0", border:"#90caf9"},
+  {bg:"#e8f5e9", text:"#2e7d32", border:"#a5d6a7"},
+  {bg:"#f3e5f5", text:"#6a1b9a", border:"#ce93d8"},
+  {bg:"#fff3e0", text:"#e65100", border:"#ffcc80"},
+  {bg:"#e0f2f1", text:"#00695c", border:"#80cbc4"},
+  {bg:"#fce4ec", text:"#ad1457", border:"#f48fb1"},
+  {bg:"#fff8e1", text:"#7c4a00", border:"#ffe082"},
+  {bg:"#e8eaf6", text:"#283593", border:"#9fa8da"},
+  {bg:"#ffebee", text:"#c62828", border:"#ef9a9a"}
+];
+function personColor(name){
+  const idx = OWNERS.indexOf(name);
+  return idx === -1 ? null : PERSON_COLOR_PALETTE[idx % PERSON_COLOR_PALETTE.length];
+}
+
+function buildOwnerChipsHtml(values){
+  if(!values || values.length === 0){
+    return '<span class="owner-chip placeholder">Assegna…</span>';
+  }
+  return values.map(v => {
+    const c = personColor(v);
+    const style = c ? ` style="background:${c.bg}; color:${c.text}; border-color:${c.border};"` : "";
+    // Etichetta sempre su una riga sola (mai a capo): le colonne sono dimensionate per contenere
+    // per intero anche i riferimenti piu' lunghi (es. nomi attività in "Dipende da").
+    return `<span class="owner-chip" title="${escapeHtml(v)}"${style}>${escapeHtml(v)}</span>`;
+  }).join("");
+}
+
+function buildMultiPicker(kind, id, field, selected, optionsList){
+  const sel = selected || [];
+  const options = optionsList.map(o => {
+    const c = personColor(o);
+    const dot = c ? `<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${c.text}; flex-shrink:0;"></span>` : "";
+    return `
+    <label class="owner-picker-option">
+      <input type="checkbox" value="${escapeHtml(o)}" ${sel.includes(o) ? "checked" : ""} onchange="onPickerCheckboxChange(this)">
+      ${dot}${escapeHtml(o)}
+    </label>
+  `;
+  }).join("");
+  return `
+    <div class="owner-picker" data-kind="${kind}" data-field="${field}" data-id="${id}">
+      <button type="button" class="owner-picker-btn" onclick="toggleOwnerPicker(this, event)">
+        <span class="owner-chips">${buildOwnerChipsHtml(sel)}</span><span class="chev">▾</span>
+      </button>
+      <div class="owner-picker-panel" onclick="event.stopPropagation()">${options}</div>
+    </div>
+  `;
+}
+
+function closeAllOwnerPanels(){
+  document.querySelectorAll(".owner-picker-panel").forEach(p => p.style.display = "none");
+  document.querySelectorAll(".owner-picker-btn").forEach(b => b.classList.remove("open"));
+}
+function toggleOwnerPicker(btn, evt){
+  if(evt) evt.stopPropagation();
+  const panel = btn.parentElement.querySelector(".owner-picker-panel");
+  const willOpen = panel.style.display !== "block";
+  closeAllOwnerPanels();
+  if(willOpen){
+    panel.style.display = "block";
+    btn.classList.add("open");
+  }
+}
+document.addEventListener("click", closeAllOwnerPanels);
+
+// ---- Registro tabelle: mappa "kind" -> {getData,setData,save,render,newRow,idPrefix} ----
+// Usato dai gestori globali (onclick/onchange) per trovare il dataset giusto senza duplicare codice.
+const TABLE_REGISTRY = {};
+function registerTable(kind, cfg){ TABLE_REGISTRY[kind] = cfg; }
+
+function onPickerCheckboxChange(checkbox){
+  const wrapper = checkbox.closest(".owner-picker");
+  const allBoxes = Array.from(wrapper.querySelectorAll("input[type=checkbox]"));
+
+  // "Nessuno" e' mutuamente esclusivo con qualsiasi altra selezione (es. dipendenze Roadmap).
+  if(checkbox.value === "Nessuno" && checkbox.checked){
+    allBoxes.forEach(b => { if(b !== checkbox) b.checked = false; });
+  } else if(checkbox.checked){
+    const noneBox = allBoxes.find(b => b.value === "Nessuno");
+    if(noneBox) noneBox.checked = false;
+  }
+
+  const kind = wrapper.getAttribute("data-kind");
+  const field = wrapper.getAttribute("data-field");
+  const id = wrapper.getAttribute("data-id");
+  const cfg = TABLE_REGISTRY[kind];
+  if(!cfg) return;
+  const item = cfg.getData().find(x => x.id === id);
+  if(!item) return;
+
+  item[field] = allBoxes.filter(b => b.checked).map(b => b.value);
+  cfg.save();
+  wrapper.querySelector(".owner-chips").innerHTML = buildOwnerChipsHtml(item[field]);
+}
+
+function addRow(kind){
+  const cfg = TABLE_REGISTRY[kind];
+  if(!cfg) return;
+  cfg.seq = (cfg.seq || 0) + 1;
+  const newItem = cfg.newRow(cfg.idPrefix + cfg.seq);
+  cfg.getData().push(newItem);
+  cfg.save();
+  cfg.render();
+}
+function deleteRow(kind, id){
+  const cfg = TABLE_REGISTRY[kind];
+  if(!cfg) return;
+  if(!confirm("Eliminare questa riga?")) return;
+  cfg.setData(cfg.getData().filter(r => r.id !== id));
+  cfg.save();
+  cfg.render();
+}
+
+// ---- Motore generico di tabella editabile (colonne configurabili) ----
+function buildFieldCell(col, item, id){
+  const val = item[col.field] ?? "";
+  if(col.type === "text" || col.type === "textarea"){
+    const rows = col.type === "textarea" ? 2 : 1;
+    return `<textarea rows="${rows}" class="edit-input" data-field="${col.field}" data-id="${id}">${escapeHtml(val)}</textarea>`;
+  }
+  if(col.type === "date"){
+    return `<input type="date" class="edit-input" value="${escapeHtml(val)}" data-field="${col.field}" data-id="${id}">`;
+  }
+  if(col.type === "select"){
+    const opts = Object.keys(col.options).map(k =>
+      `<option value="${k}" ${val === k ? "selected" : ""}>${col.options[k]}</option>`
+    ).join("");
+    return `<select class="edit-select" data-field="${col.field}" data-id="${id}">${opts}</select>`;
+  }
+  return "";
+}
+
+function renderTableHead(rowId, columns, opts){
+  opts = opts || {};
+  const row = document.getElementById(rowId);
+  if(!row) return;
+  const ths = columns.map(c => `<th${c.width ? ` style="width:${c.width}"` : ""}>${c.label}</th>`).join("");
+  const actionsTh = opts.noDelete ? "" : `<th class="no-print" style="width:5%">Azioni</th>`;
+  row.innerHTML = ths + actionsTh;
+}
+
+function renderEditableTable(tbodyId, dataset, columns, kind, saveFn, renderSelfFn, opts){
+  opts = opts || {};
+  const tbody = document.getElementById(tbodyId);
+  tbody.innerHTML = "";
+
+  dataset.forEach(item => {
+    const editCells = columns.map(col => {
+      if(col.type === "picker"){
+        const optList = col.optionsFn ? col.optionsFn(dataset, item.id) : col.options;
+        return `<td>${buildMultiPicker(kind, item.id, col.field, item[col.field] || [], optList)}</td>`;
+      }
+      return `<td>${buildFieldCell(col, item, item.id)}</td>`;
+    }).join("");
+    const deleteCell = opts.noDelete ? "" :
+      `<td class="row-actions no-print"><button class="icon-btn" onclick="deleteRow('${kind}','${item.id}')" title="Elimina riga">🗑️</button></td>`;
+
+    const editRow = document.createElement("tr");
+    editRow.className = "screen-row";
+    editRow.innerHTML = editCells + deleteCell;
+    tbody.appendChild(editRow);
+
+    const printCells = columns.map(col => {
+      const val = item[col.field];
+      if(col.type === "picker"){
+        return `<td>${(val && val.length) ? escapeHtml(val.join(", ")) : "—"}</td>`;
+      }
+      if(col.type === "select"){
+        return `<td>${col.options[val] || escapeHtml(val || "")}</td>`;
+      }
+      if(col.type === "date"){
+        return `<td>${fmtDateIt(val)}</td>`;
+      }
+      return `<td>${escapeHtml(val || "")}</td>`;
+    }).join("");
+    const printRow = document.createElement("tr");
+    printRow.className = "print-row";
+    printRow.innerHTML = printCells + (opts.noDelete ? "" : "<td></td>");
+    tbody.appendChild(printRow);
+  });
+
+  wireAutoResize(tbody);
+
+  // Solo i veri controlli di form: il wrapper .owner-picker porta anch'esso data-field
+  // (serve al suo gestore dedicato) ma il "change" nativo della checkbox al suo interno
+  // risalirebbe (bubbling) fino a qui, sovrascrivendo per errore il valore del picker.
+  tbody.querySelectorAll("textarea[data-field], input[data-field], select[data-field]").forEach(el => {
+    el.addEventListener("change", () => {
+      const id = el.getAttribute("data-id");
+      const field = el.getAttribute("data-field");
+      const item = dataset.find(r => r.id === id);
+      if(!item) return;
+      item[field] = el.value;
+      saveFn();
+      renderSelfFn();
+    });
+  });
+}
+
+// ======================================================================
+// Dataset: Stakeholder
+// ======================================================================
+const STAKEHOLDER_KEY = "oms_stakeholder_v1";
+const DEFAULT_STAKEHOLDERS = [
+  {id:"s1", nome:"Luigi Barra", ruolo:"Chief Supply Chain Officer", coinvolgimento:"Convocatore kick-off / Sponsor de facto"},
+  {id:"s2", nome:"Marco Piantoni", ruolo:"Project Leader (in conferma)", coinvolgimento:"Leadership analisi KPI — conferma attesa entro WK30 (previo accordo con Paolo Zanco)"},
+  {id:"s3", nome:"Eugenio Frescura", ruolo:"Proponente KPI", coinvolgimento:"Ha definito la proposta di KPI minimi da monitorare"},
+  {id:"s4", nome:"Paolo Zanco", ruolo:"Stakeholder", coinvolgimento:"Validazione assegnazione leadership"},
+  {id:"s5", nome:"Marco Benasedo", ruolo:"Stakeholder", coinvolgimento:"Partecipante kick-off"},
+  {id:"s6", nome:"Claudia Sogus", ruolo:"Business Input", coinvolgimento:"Intervista dedicata per spunti di business aggiuntivo (WK31)"},
+  {id:"s7", nome:"Raul Simon", ruolo:"Da chiarire", coinvolgimento:"Owner KPI (pool assegnazione)"},
+  {id:"s8", nome:"Alberto Sala", ruolo:"Da chiarire", coinvolgimento:"Owner KPI (pool assegnazione)"},
+  {id:"s9", nome:"Maja Sztekiel", ruolo:"Da chiarire", coinvolgimento:"Owner KPI (pool assegnazione)"}
+];
+const STAKEHOLDER_COLUMNS = [
+  {field:"nome", label:"Nome", type:"text", width:"18%"},
+  {field:"ruolo", label:"Ruolo", type:"text", width:"22%"},
+  {field:"coinvolgimento", label:"Coinvolgimento nel progetto", type:"textarea", width:"54%"}
+];
+function loadStakeholders(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(STAKEHOLDER_KEY));
+    if(Array.isArray(saved) && saved.length) return saved;
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_STAKEHOLDERS));
+}
+function saveStakeholders(){ localStorage.setItem(STAKEHOLDER_KEY, JSON.stringify(stakeholderData)); }
+let stakeholderData = loadStakeholders();
+function renderStakeholderTable(){
+  renderEditableTable("stakeholder-body", stakeholderData, STAKEHOLDER_COLUMNS, "stakeholder", saveStakeholders, renderStakeholderTable);
+}
+registerTable("stakeholder", {
+  getData: () => stakeholderData,
+  setData: (arr) => { stakeholderData = arr; },
+  save: saveStakeholders,
+  render: renderStakeholderTable,
+  idPrefix: "s",
+  seq: stakeholderData.reduce((max, r) => Math.max(max, parseInt((r.id || "s0").replace("s", ""), 10) || 0), 0),
+  newRow: (id) => ({id, nome:"Nuovo stakeholder", ruolo:"Da definire", coinvolgimento:""})
+});
+
+// ======================================================================
+// Dataset: Sistemi Attuali
+// ======================================================================
+const SISTEMI_KEY = "oms_sistemi_v1";
+const DEFAULT_SISTEMI = [
+  {id:"sy1", sistema:"OMS attuale", ruolo:"Orchestrazione ordini omnichannel — oggetto della valutazione di sostituzione/upgrade"},
+  {id:"sy2", sistema:".com / Marketplace (MKT)", ruolo:"Canali di vendita online da sincronizzare con lo stock"},
+  {id:"sy3", sistema:"WMS", ruolo:"Gestione magazzino — stock fisico teorico"},
+  {id:"sy4", sistema:"Sistema negozi (\"XY\" / \"St3k\")", ruolo:"Stock fisico negozio — nome sistema da confermare"}
+];
+const SISTEMI_COLUMNS = [
+  {field:"sistema", label:"Sistema", type:"text", width:"28%"},
+  {field:"ruolo", label:"Ruolo nel flusso", type:"textarea", width:"66%"}
+];
+function loadSistemi(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(SISTEMI_KEY));
+    if(Array.isArray(saved) && saved.length) return saved;
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_SISTEMI));
+}
+function saveSistemi(){ localStorage.setItem(SISTEMI_KEY, JSON.stringify(sistemiData)); }
+let sistemiData = loadSistemi();
+function renderSistemiTable(){
+  renderEditableTable("sistemi-body", sistemiData, SISTEMI_COLUMNS, "sistemi", saveSistemi, renderSistemiTable);
+}
+registerTable("sistemi", {
+  getData: () => sistemiData,
+  setData: (arr) => { sistemiData = arr; },
+  save: saveSistemi,
+  render: renderSistemiTable,
+  idPrefix: "sy",
+  seq: sistemiData.reduce((max, r) => Math.max(max, parseInt((r.id || "sy0").replace("sy", ""), 10) || 0), 0),
+  newRow: (id) => ({id, sistema:"Nuovo sistema", ruolo:""})
+});
+
+// ======================================================================
+// Dataset: KPI
+// ======================================================================
+const KPI_STORAGE_KEY = "oms_kpi_data_v1";
+const LEGACY_OWNER_KEY = "oms_kpi_owners_v1"; // formato precedente (solo assegnazioni), usato per migrazione
+const DEFAULT_KPIS = [
+  {id:"k1", area:"Giacenze", kpi:"Overselling Rate", formula:"N. ordini annullati/rimborsati per mancanza stock nel giorno / Tot. ordini acquisiti nel giorno", fonte:"OMS", baseline:"", target:"", deadline:"WK31"},
+  {id:"k2", area:"Giacenze", kpi:"Inventory Sync Time", formula:"Tempo (media + p95) tra vendita/reso e aggiornamento stock pubblicato su .com/MKT", fonte:"OMS log", baseline:"", target:"", deadline:"WK31"},
+  {id:"k3", area:"Giacenze", kpi:"Disallineamento Inventariale", formula:"N. SKU con discrepanza fisico-teorica nel giorno / Tot. SKU verificati nel giorno", fonte:"Conteggi negozio + WMS", baseline:"", target:"", deadline:"WK31"},
+  {id:"k4", area:"Routing", kpi:"Split Order Rate", formula:"N. ordini splittati in ≥2 spedizioni nel giorno / Tot. ordini gestiti nel giorno", fonte:"OMS", baseline:"", target:"", deadline:"WK31"},
+  {id:"k5", area:"Routing", kpi:"Store Rejection Rate", formula:"N. rifiuti da personale negozio nel giorno / Tot. ordini indirizzati a negozio", fonte:"OMS + store ops", baseline:"", target:"", deadline:"WK31"},
+  {id:"k6", area:"Routing", kpi:"Routing Time", formula:"Tempo (media + p95) per applicare regole business e determinare nodo logistico ottimale", fonte:"OMS", baseline:"", target:"", deadline:"WK31"},
+  {id:"k7", area:"Logistica", kpi:"Order Lead Time", formula:"Tempo (media + dev.std.) da conferma ordine sul sito a drop verso WMS/negozio", fonte:"OMS/WMS", baseline:"", target:"", deadline:"WK31"},
+  {id:"k8", area:"Logistica", kpi:"Order Touch Rate", formula:"N. ordini bloccati/modificati manualmente nel giorno / Tot. ordini gestiti dall'OMS", fonte:"OMS", baseline:"", target:"", deadline:"WK31"},
+  {id:"k9", area:"Cliente", kpi:"OTIF", formula:"N. ordini consegnati integri entro data promessa / Tot. ordini con consegna prevista nel giorno", fonte:"OMS/WMS", baseline:"", target:"", deadline:"WK31"},
+  {id:"k10", area:"Economico", kpi:"Costo per Ordine Gestito", formula:"(Costi OMS + costi operativi gestione ordine) / Tot. ordini gestiti", fonte:"Finance/IT", baseline:"", target:"", deadline:"Dopo business case"}
+];
+const KPI_COLUMNS = [
+  {field:"area", label:"Area", type:"text", width:"10%"},
+  {field:"kpi", label:"KPI", type:"text", width:"12%"},
+  {field:"formula", label:"Formula", type:"textarea", width:"16%"},
+  {field:"fonte", label:"Fonte Dato", type:"text", width:"9%"},
+  {field:"baseline", label:"Baseline", type:"text", width:"8%"},
+  {field:"target", label:"Target", type:"text", width:"8%"},
+  {field:"owners", label:"Owner", type:"picker", options: OWNERS, width:"16%"},
+  {field:"deadline", label:"Deadline", type:"text", width:"8%"}
+];
+function loadKpiData(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(KPI_STORAGE_KEY));
+    if(Array.isArray(saved) && saved.length) return saved;
+  }catch(e){}
+  // Prima esecuzione dopo l'aggiornamento: riparte dai default, recuperando eventuali
+  // assegnazioni owner gia' fatte con il vecchio formato "solo assegnazioni".
+  let legacyOwners = {};
+  try{ legacyOwners = JSON.parse(localStorage.getItem(LEGACY_OWNER_KEY)) || {}; }catch(e){}
+  return DEFAULT_KPIS.map(k => ({...k, owners: legacyOwners[k.id] || []}));
+}
+function saveKpiData(){ localStorage.setItem(KPI_STORAGE_KEY, JSON.stringify(kpiData)); }
+let kpiData = loadKpiData();
+function renderKpiTable(){
+  renderEditableTable("kpi-body", kpiData, KPI_COLUMNS, "kpi", saveKpiData, renderKpiTable);
+}
+registerTable("kpi", {
+  getData: () => kpiData,
+  setData: (arr) => { kpiData = arr; },
+  save: saveKpiData,
+  render: renderKpiTable,
+  idPrefix: "k",
+  seq: kpiData.reduce((max, r) => Math.max(max, parseInt((r.id || "k0").replace("k", ""), 10) || 0), 0),
+  newRow: (id) => ({id, area:"Nuova area", kpi:"Nuovo KPI", formula:"Definire formula", fonte:"Da definire", baseline:"", target:"", owners:[], deadline:"Da definire"})
+});
+
+// ======================================================================
+// Dataset: Roadmap
+// ======================================================================
+const ROADMAP_KEY = "oms_roadmap_v1";
+const DEFAULT_ROADMAP = [
+  {id:"r1", task:"Conferma incarico leadership", owners:["Marco Piantoni"], dependsOn:[], priority:"alta", start:"2026-07-15", end:"2026-07-26", status:"in-corso"},
+  {id:"r2", task:"Assegnazione owner KPI (pool 7 nominativi)", owners:["Marco Piantoni"], dependsOn:[], priority:"alta", start:"2026-07-15", end:"2026-07-26", status:"in-corso"},
+  {id:"r3", task:"Raccolta e consolidamento dati KPI", owners:[], dependsOn:["Assegnazione owner KPI (pool 7 nominativi)"], priority:"alta", start:"2026-07-20", end:"2026-12-31", status:"da-avviare"},
+  {id:"r4", task:"Intervista Claudia Sogus (business input)", owners:["Marco Piantoni","Claudia Sogus"], dependsOn:[], priority:"media", start:"2026-07-27", end:"2026-08-02", status:"da-avviare"},
+  {id:"r5", task:"Verifica completezza dati raccolti (riunione)", owners:[], dependsOn:["Raccolta e consolidamento dati KPI"], priority:"alta", start:"2026-07-27", end:"2026-08-02", status:"da-avviare"},
+  {id:"r6", task:"Prima analisi dati raccolti", owners:[], dependsOn:["Verifica completezza dati raccolti (riunione)"], priority:"alta", start:"2026-09-14", end:"2026-09-20", status:"da-avviare"}
+];
+const ROADMAP_COLUMNS = [
+  {field:"task", label:"Attività", type:"text", width:"13%"},
+  {field:"owners", label:"Owner", type:"picker", options: OWNERS, width:"17%"},
+  {field:"dependsOn", label:"Dipende da", type:"picker", optionsFn:(ds, id) => ["Nessuno", ...ds.filter(r => r.id !== id).map(r => r.task)], width:"25%"},
+  {field:"priority", label:"Priorità", type:"select", options: PRIORITY_LABELS, width:"7%"},
+  {field:"start", label:"Inizio", type:"date", width:"11%"},
+  {field:"end", label:"Fine", type:"date", width:"11%"},
+  {field:"status", label:"Stato", type:"select", options: STATUS_LABELS, width:"11%"}
+];
+function loadRoadmap(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(ROADMAP_KEY));
+    if(Array.isArray(saved) && saved.length) return saved;
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_ROADMAP));
+}
+function saveRoadmap(){ localStorage.setItem(ROADMAP_KEY, JSON.stringify(roadmapData)); }
+let roadmapData = loadRoadmap();
+function renderRoadmapTable(){
+  renderEditableTable("roadmap-body", roadmapData, ROADMAP_COLUMNS, "roadmap", saveRoadmap, renderRoadmapTable);
+}
+registerTable("roadmap", {
+  getData: () => roadmapData,
+  setData: (arr) => { roadmapData = arr; },
+  save: saveRoadmap,
+  render: renderRoadmapTable,
+  idPrefix: "r",
+  seq: roadmapData.reduce((max, r) => Math.max(max, parseInt((r.id || "r0").replace("r", ""), 10) || 0), 0),
+  newRow: (id) => {
+    const today = new Date().toISOString().slice(0, 10);
+    return {id, task:"Nuova attività", owners:[], dependsOn:[], priority:"media", start:today, end:today, status:"da-avviare"};
+  }
+});
+
+// ======================================================================
+// Dataset: Registro Rischi
+// ======================================================================
+const RISK_KEY = "oms_risk_v1";
+const DEFAULT_RISKS = [
+  {id:"rk1", rischio:"Sistema negozi non identificato con certezza (\"XY\" / \"St3k\")", categoria:"dati", impatto:"media", probabilita:"alta", mitigazione:"Confermare nome e owner del sistema entro WK31", owners:[], stato:"aperto"},
+  {id:"rk2", rischio:"Ritardo nella conferma della leadership di progetto", categoria:"organizzativo", impatto:"media", probabilita:"media", mitigazione:"Sollecitare accordo Piantoni/Zanco entro WK30", owners:["Marco Piantoni","Paolo Zanco"], stato:"aperto"},
+  {id:"rk3", rischio:"Dati storici KPI non disponibili o incompleti", categoria:"dati", impatto:"alta", probabilita:"media", mitigazione:"Setup dedicato di raccolta per i KPI privi di storico affidabile", owners:[], stato:"aperto"}
+];
+const RISK_COLUMNS = [
+  {field:"rischio", label:"Rischio", type:"textarea", width:"21%"},
+  {field:"categoria", label:"Categoria", type:"select", options: RISK_CATEGORY_LABELS, width:"12%"},
+  {field:"impatto", label:"Impatto", type:"select", options: LEVEL_LABELS, width:"8%"},
+  {field:"probabilita", label:"Probabilità", type:"select", options: LEVEL_LABELS, width:"8%"},
+  {field:"mitigazione", label:"Mitigazione", type:"textarea", width:"18%"},
+  {field:"owners", label:"Owner", type:"picker", options: OWNERS, width:"17%"},
+  {field:"stato", label:"Stato", type:"select", options: RISK_STATUS_LABELS, width:"8%"}
+];
+function loadRisks(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(RISK_KEY));
+    if(Array.isArray(saved) && saved.length) return saved;
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_RISKS));
+}
+function saveRisks(){ localStorage.setItem(RISK_KEY, JSON.stringify(riskData)); }
+let riskData = loadRisks();
+function renderRiskTable(){
+  renderEditableTable("risk-body", riskData, RISK_COLUMNS, "risk", saveRisks, renderRiskTable);
+}
+registerTable("risk", {
+  getData: () => riskData,
+  setData: (arr) => { riskData = arr; },
+  save: saveRisks,
+  render: renderRiskTable,
+  idPrefix: "rk",
+  seq: riskData.reduce((max, r) => Math.max(max, parseInt((r.id || "rk0").replace("rk", ""), 10) || 0), 0),
+  newRow: (id) => ({id, rischio:"Nuovo rischio", categoria:"organizzativo", impatto:"media", probabilita:"media", mitigazione:"", owners:[], stato:"aperto"})
+});
+
+// ======================================================================
+// Dataset: Matrice RACI
+// ======================================================================
+const RACI_KEY = "oms_raci_v1";
+const DEFAULT_RACI = [
+  {id:"ra1", decisione:"Conferma incarico leadership progetto", responsible:["Marco Piantoni"], accountable:["Paolo Zanco"], consulted:["Luigi Barra"], informed:["Marco Benasedo","Claudia Sogus"]},
+  {id:"ra2", decisione:"Approvazione budget OMS", responsible:[], accountable:["Luigi Barra"], consulted:["Marco Piantoni"], informed:[]},
+  {id:"ra3", decisione:"Scelta vendor/soluzione OMS", responsible:["Marco Piantoni"], accountable:["Luigi Barra"], consulted:["Eugenio Frescura","Paolo Zanco"], informed:["Marco Benasedo","Claudia Sogus"]}
+];
+const RACI_COLUMNS = [
+  {field:"decisione", label:"Decisione / Area", type:"textarea", width:"22%"},
+  {field:"responsible", label:"R — Responsible", type:"picker", options: OWNERS, width:"15%"},
+  {field:"accountable", label:"A — Accountable", type:"picker", options: OWNERS, width:"15%"},
+  {field:"consulted", label:"C — Consulted", type:"picker", options: OWNERS, width:"15%"},
+  {field:"informed", label:"I — Informed", type:"picker", options: OWNERS, width:"15%"}
+];
+function loadRaci(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(RACI_KEY));
+    if(Array.isArray(saved) && saved.length) return saved;
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_RACI));
+}
+function saveRaci(){ localStorage.setItem(RACI_KEY, JSON.stringify(raciData)); }
+let raciData = loadRaci();
+function renderRaciTable(){
+  renderEditableTable("raci-body", raciData, RACI_COLUMNS, "raci", saveRaci, renderRaciTable);
+}
+registerTable("raci", {
+  getData: () => raciData,
+  setData: (arr) => { raciData = arr; },
+  save: saveRaci,
+  render: renderRaciTable,
+  idPrefix: "ra",
+  seq: raciData.reduce((max, r) => Math.max(max, parseInt((r.id || "ra0").replace("ra", ""), 10) || 0), 0),
+  newRow: (id) => ({id, decisione:"Nuova decisione", responsible:[], accountable:[], consulted:[], informed:[]})
+});
+
+// ======================================================================
+// Dataset: Business Case
+// ======================================================================
+const BUSINESS_KEY = "oms_business_v1";
+const DEFAULT_BUSINESS = [
+  {id:"b1", voce:"Implementazione / System Integration", categoria:"capex", asis:"—", tobe:"Da benchmark mercato"},
+  {id:"b2", voce:"Licenza software OMS (annua)", categoria:"opex", asis:"Dato mancante", tobe:"Da benchmark mercato"},
+  {id:"b3", voce:"Manutenzione e supporto (annuo)", categoria:"opex", asis:"Dato mancante", tobe:"Da benchmark mercato"},
+  {id:"b4", voce:"Volume ordini/giorno", categoria:"kpi", asis:"Dato mancante", tobe:"—"},
+  {id:"b5", voce:"Costo per Ordine Gestito", categoria:"kpi", asis:"Dato mancante", tobe:"Da stimare post KPI"},
+  {id:"b6", voce:"Overselling Rate", categoria:"kpi", asis:"In raccolta (WK31→)", tobe:"Target da definire"},
+  {id:"b7", voce:"OTIF", categoria:"kpi", asis:"In raccolta (WK31→)", tobe:"Target da definire"}
+];
+const BUSINESS_COLUMNS = [
+  {field:"voce", label:"Voce", type:"text", width:"32%"},
+  {field:"categoria", label:"Categoria", type:"select", options: BC_CATEGORY_LABELS, width:"14%"},
+  {field:"asis", label:"As-Is (attuale)", type:"text", width:"27%"},
+  {field:"tobe", label:"To-Be (con nuovo OMS)", type:"text", width:"27%"}
+];
+function loadBusiness(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(BUSINESS_KEY));
+    if(Array.isArray(saved) && saved.length) return saved;
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_BUSINESS));
+}
+function saveBusiness(){ localStorage.setItem(BUSINESS_KEY, JSON.stringify(businessData)); }
+let businessData = loadBusiness();
+function renderBusinessTable(){
+  renderEditableTable("business-body", businessData, BUSINESS_COLUMNS, "business", saveBusiness, renderBusinessTable);
+}
+registerTable("business", {
+  getData: () => businessData,
+  setData: (arr) => { businessData = arr; },
+  save: saveBusiness,
+  render: renderBusinessTable,
+  idPrefix: "b",
+  seq: businessData.reduce((max, r) => Math.max(max, parseInt((r.id || "b0").replace("b", ""), 10) || 0), 0),
+  newRow: (id) => ({id, voce:"Nuova voce", categoria:"opex", asis:"", tobe:""})
+});
+
+// ======================================================================
+// Dataset: Vendor / Opzioni
+// ======================================================================
+const VENDOR_KEY = "oms_vendor_v1";
+const DEFAULT_VENDORS = [
+  {id:"v1", vendor:"Da definire", fit:"media", integrazione:"media", costo:"Da definire", note:"Sezione da popolare dopo lo studio di fattibilità", stato:"da-valutare"}
+];
+const VENDOR_COLUMNS = [
+  {field:"vendor", label:"Vendor / Opzione", type:"text", width:"15%"},
+  {field:"fit", label:"Fit Funzionale", type:"select", options: LEVEL_LABELS, width:"10%"},
+  {field:"integrazione", label:"Complessità Integrazione", type:"select", options: LEVEL_LABELS, width:"13%"},
+  {field:"costo", label:"Costo Stimato", type:"text", width:"12%"},
+  {field:"note", label:"Note", type:"textarea", width:"22%"},
+  {field:"stato", label:"Stato Valutazione", type:"select", options: VENDOR_STATUS_LABELS, width:"14%"}
+];
+function loadVendors(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(VENDOR_KEY));
+    if(Array.isArray(saved) && saved.length) return saved;
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_VENDORS));
+}
+function saveVendors(){ localStorage.setItem(VENDOR_KEY, JSON.stringify(vendorData)); }
+let vendorData = loadVendors();
+function renderVendorTable(){
+  renderEditableTable("vendor-body", vendorData, VENDOR_COLUMNS, "vendor", saveVendors, renderVendorTable);
+}
+registerTable("vendor", {
+  getData: () => vendorData,
+  setData: (arr) => { vendorData = arr; },
+  save: saveVendors,
+  render: renderVendorTable,
+  idPrefix: "v",
+  seq: vendorData.reduce((max, r) => Math.max(max, parseInt((r.id || "v0").replace("v", ""), 10) || 0), 0),
+  newRow: (id) => ({id, vendor:"Nuovo vendor", fit:"media", integrazione:"media", costo:"", note:"", stato:"da-valutare"})
+});
+
+// ---- Inizializzazione: header colonne + prima renderizzazione di tutte le tabelle ----
+renderTableHead("stakeholder-head", STAKEHOLDER_COLUMNS);
+renderTableHead("sistemi-head", SISTEMI_COLUMNS);
+renderTableHead("kpi-head", KPI_COLUMNS);
+renderTableHead("roadmap-head", ROADMAP_COLUMNS);
+renderTableHead("risk-head", RISK_COLUMNS);
+renderTableHead("raci-head", RACI_COLUMNS);
+renderTableHead("business-head", BUSINESS_COLUMNS);
+renderTableHead("vendor-head", VENDOR_COLUMNS);
+
+renderStakeholderTable();
+renderSistemiTable();
+renderKpiTable();
+renderRoadmapTable();
+renderRiskTable();
+renderRaciTable();
+renderBusinessTable();
+renderVendorTable();
+
+// ---- Salva/Carica dati (backup JSON di tutti i dataset) ----
+function exportAssignments(){
+  const data = {
+    kpis: kpiData,
+    roadmap: roadmapData,
+    stakeholders: stakeholderData,
+    sistemi: sistemiData,
+    risks: riskData,
+    raci: raciData,
+    business: businessData,
+    vendor: vendorData
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const ts = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `oms_project_backup_${ts}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function triggerImport(){
+  document.getElementById("import-file-input").click();
+}
+
+function handleImportFile(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const data = JSON.parse(e.target.result);
+      if(Array.isArray(data.kpis)){ kpiData = data.kpis; saveKpiData(); renderKpiTable(); }
+      if(Array.isArray(data.roadmap)){ roadmapData = data.roadmap; saveRoadmap(); renderRoadmapTable(); }
+      if(Array.isArray(data.stakeholders)){ stakeholderData = data.stakeholders; saveStakeholders(); renderStakeholderTable(); }
+      if(Array.isArray(data.sistemi)){ sistemiData = data.sistemi; saveSistemi(); renderSistemiTable(); }
+      if(Array.isArray(data.risks)){ riskData = data.risks; saveRisks(); renderRiskTable(); }
+      if(Array.isArray(data.raci)){ raciData = data.raci; saveRaci(); renderRaciTable(); }
+      if(Array.isArray(data.business)){ businessData = data.business; saveBusiness(); renderBusinessTable(); }
+      if(Array.isArray(data.vendor)){ vendorData = data.vendor; saveVendors(); renderVendorTable(); }
+      alert("Dati caricati correttamente dal file: " + file.name);
+    }catch(err){
+      alert("File non valido o corrotto: " + err.message);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = "";
+}
+
+// ---- Tabs ----
+function showView(name, btn){
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  const view = document.getElementById(name + "-view");
+  view.classList.add("active");
+  btn.classList.add("active");
+  if(name === "gantt") renderGantt();
+  resizeVisibleTextareas(view);
+}
+
+// ---- Gantt (ricostruito dai dati Roadmap ad ogni apertura del tab) ----
+const MONTH_NAMES_IT = ["Gen","Feb","Mar","Apr","Mag","Giu","Lug","Ago","Set","Ott","Nov","Dic"];
+
+function renderGantt(){
+  const container = document.getElementById("gantt-grid");
+  container.innerHTML = "";
+
+  if(roadmapData.length === 0){
+    container.innerHTML = '<div class="gantt-cell-header-label">Nessuna attività in roadmap</div>';
+    return;
+  }
+
+  const starts = roadmapData.map(r => new Date(r.start));
+  const ends = roadmapData.map(r => new Date(r.end));
+  let rangeStart = new Date(Math.min(...starts));
+  let rangeEnd = new Date(Math.max(...ends));
+  // estende ai margini di mese per avere gridline pulite
+  rangeStart = new Date(rangeStart.getFullYear(), rangeStart.getMonth(), 1);
+  rangeEnd = new Date(rangeEnd.getFullYear(), rangeEnd.getMonth() + 1, 0);
+  const totalDays = Math.max(1, (rangeEnd - rangeStart) / 86400000);
+
+  // Marcatore della data odierna: calcolato una volta, riusato per la linea nell'header mesi
+  // e per la linea ripetuta in ogni riga (cosi' attraversa visivamente tutto il Gantt).
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  let todayLeftPct = null;
+  if(today >= rangeStart && today <= rangeEnd){
+    todayLeftPct = (today - rangeStart) / 86400000 / totalDays * 100;
+  }
+
+  const headerLabel = document.createElement("div");
+  headerLabel.className = "gantt-cell-header-label";
+  headerLabel.textContent = "Attività / Owner / Scadenza";
+  container.appendChild(headerLabel);
+
+  const monthsCell = document.createElement("div");
+  monthsCell.className = "gantt-cell-months";
+  let cursor = new Date(rangeStart);
+  while(cursor <= rangeEnd){
+    const m = document.createElement("div");
+    m.className = "gantt-month";
+    m.textContent = MONTH_NAMES_IT[cursor.getMonth()] + " " + cursor.getFullYear();
+    monthsCell.appendChild(m);
+    cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+  }
+  if(todayLeftPct !== null){
+    const todayLabel = document.createElement("div");
+    todayLabel.className = "gantt-today-label";
+    todayLabel.style.left = todayLeftPct + "%";
+    todayLabel.textContent = "Oggi";
+    monthsCell.appendChild(todayLabel);
+  }
+  container.appendChild(monthsCell);
+
+  roadmapData.forEach(item => {
+    const owners = item.owners || [];
+    const ownerText = owners.length ? owners.join(", ") : "Da assegnare"; // solo per il tooltip (title)
+
+    const label = document.createElement("div");
+    label.className = "gantt-cell-label";
+    label.innerHTML = `
+      <span style="width:100%;">
+        <b>${escapeHtml(item.task)}</b>
+        <div style="display:flex; flex-wrap:wrap; align-items:center; gap:4px; margin-top:2px;">
+          ${buildOwnerChipsHtml(owners)}
+          <span style="color:var(--text-light); font-size:0.75rem;">· ${fmtDateIt(item.start)}–${fmtDateIt(item.end)}</span>
+        </div>
+      </span>`;
+    container.appendChild(label);
+
+    const track = document.createElement("div");
+    track.className = "gantt-cell-track";
+
+    const start = new Date(item.start);
+    const end = new Date(item.end);
+    const left = Math.max(0, (start - rangeStart) / 86400000) / totalDays * 100;
+    const width = Math.max(1.5, ((end - start) / 86400000) / totalDays * 100);
+
+    const bar = document.createElement("div");
+    bar.className = "gantt-bar prio-" + item.priority;
+    bar.style.left = left + "%";
+    bar.style.width = width + "%";
+    // Nessun testo dentro le barre: restano tutte "mute" e coerenti tra loro
+    // (il nome completo e' gia' a sinistra, e disponibile anche al passaggio del mouse).
+    bar.title = `${item.task} — ${ownerText} — ${fmtDateIt(item.start)} → ${fmtDateIt(item.end)}`;
+    track.appendChild(bar);
+
+    if(todayLeftPct !== null){
+      const todayLine = document.createElement("div");
+      todayLine.className = "gantt-today-line";
+      todayLine.style.left = todayLeftPct + "%";
+      track.appendChild(todayLine);
+    }
+
+    container.appendChild(track);
+  });
+}
+</script>
+
+</body>
+</html>
