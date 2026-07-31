@@ -97,17 +97,22 @@
     background:#eef1f6; font-weight:700; color:var(--navy-dark); text-transform:uppercase;
     font-size:0.75rem; letter-spacing:0.03em;
   }
-  .gantt-cell-months{background:#eef1f6; border-bottom:1px solid var(--gray-border); display:flex; position:relative;}
+  .gantt-cell-months{background:#eef1f6; border-bottom:1px solid var(--gray-border); position:relative; height:44px;}
   .gantt-today-line{position:absolute; top:0; bottom:0; width:2px; background:var(--navy-dark); z-index:5; pointer-events:none;}
   .gantt-today-label{
     position:absolute; top:-1px; transform:translateX(-50%); background:var(--navy-dark); color:#fff;
     font-size:0.62rem; font-weight:700; padding:1px 6px; border-radius:0 0 4px 4px; white-space:nowrap; z-index:6;
   }
+  /* Posizionate in absolute con left/width in %, esattamente come le linee tratteggiate di
+     fine mese nelle righe: stessa formula, stesso sistema di coordinate, cosi' i due bordi
+     che indicano il confine di mese coincidono sempre (con flex la larghezza cumulata dei
+     mesi precedenti veniva arrotondata in pixel indipendentemente ad ogni colonna, causando
+     un disallineamento crescente verso destra). */
   .gantt-month{
-    flex:1; text-align:center; font-size:0.75rem; font-weight:700; color:var(--navy-dark);
+    position:absolute; top:0; bottom:0; box-sizing:border-box; overflow:hidden;
+    text-align:center; font-size:0.75rem; font-weight:700; color:var(--navy-dark);
     padding:10px 4px; border-right:1px solid var(--gray-border); text-transform:uppercase; letter-spacing:0.03em;
   }
-  .gantt-month:last-child{border-right:none;}
   .gantt-cell-track{position:relative; border-bottom:1px solid var(--gray-border); min-height:41px;}
   .gantt-month-line{position:absolute; top:0; bottom:0; width:0; border-left:1px dashed var(--gray-border); pointer-events:none;}
   .gantt-bar{
@@ -1235,17 +1240,19 @@ function renderGantt(){
 
   const monthsCell = document.createElement("div");
   monthsCell.className = "gantt-cell-months";
-  // Larghezza proporzionale ai giorni effettivi del mese (non equidistribuita), cosi' i
-  // separatori tra le celle dei mesi coincidono esattamente con le linee tratteggiate di
-  // fine mese nelle righe sottostanti: indicano lo stesso confine, devono allinearsi.
+  // Posizione/larghezza in % dalla stessa origine (rangeStart) e con la stessa formula usata
+  // per le linee tratteggiate di fine mese: cosi' i due bordi che indicano lo stesso confine
+  // coincidono sempre, invece di affidarsi al flex layout (che arrotonda ogni colonna in
+  // pixel in modo indipendente, causando un disallineamento crescente verso destra).
   let cursor = new Date(rangeStart);
   while(cursor <= rangeEnd){
     const nextMonth = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
-    const daysInMonth = (nextMonth - cursor) / 86400000;
-    const widthPct = daysInMonth / totalDays * 100;
+    const leftPct = (cursor - rangeStart) / 86400000 / totalDays * 100;
+    const widthPct = (nextMonth - cursor) / 86400000 / totalDays * 100;
     const m = document.createElement("div");
     m.className = "gantt-month";
-    m.style.flex = "0 0 " + widthPct + "%";
+    m.style.left = leftPct + "%";
+    m.style.width = widthPct + "%";
     m.textContent = MONTH_NAMES_IT[cursor.getMonth()] + " " + cursor.getFullYear();
     monthsCell.appendChild(m);
     cursor = nextMonth;
