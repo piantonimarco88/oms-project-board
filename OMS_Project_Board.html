@@ -133,6 +133,12 @@
   .gantt-status-tag.done{background:#e5f4ea; color:var(--green);}
   .gantt-status-tag.progress{background:#fdf1de; color:var(--amber);}
   .gantt-status-tag.overdue{background:#fbe3e2; color:#a12420;}
+  .gantt-status-tag.todo{background:#eef1f6; color:var(--text-light);}
+  /* Le 3 righe (owner/date/stato) sotto il nome attivita' restano sempre nello stesso ordine
+     e con la stessa spaziatura, cosi' tutte le righe del Gantt sono coerenti tra loro. */
+  .gantt-row-owners{display:flex; flex-wrap:wrap; gap:4px; margin-top:4px; min-height:18px;}
+  .gantt-row-dates{color:var(--text-light); font-size:0.75rem; margin-top:3px;}
+  .gantt-row-status{margin-top:3px;}
 
   /* Tabelle editabili (motore generico: Stakeholder, Sistemi, KPI, Roadmap, Rischi, RACI, Vendor, Business Case) */
   .edit-input, .edit-select{
@@ -1269,20 +1275,24 @@ function renderGantt(){
       statusClass = " status-in-corso"; statusIcon = "▶";
       statusTag = '<span class="gantt-status-tag progress">▶ In corso</span>';
       statusTitle = " — In corso";
+    } else {
+      // "Da avviare" nei tempi: etichetta neutra, cosi' la riga ha sempre la stessa struttura
+      // (owner / date / stato) delle altre invece di restare piu' corta.
+      statusTag = '<span class="gantt-status-tag todo">○ Da avviare</span>';
     }
 
     const taskStyle = isDone ? ' style="text-decoration:line-through; color:var(--text-light);"' : "";
 
     const label = document.createElement("div");
     label.className = "gantt-cell-label";
+    // Struttura sempre a 3 righe fisse (owner / date / stato), cosi' ogni riga resta
+    // graficamente coerente con le altre indipendentemente dal contenuto.
     label.innerHTML = `
       <span style="width:100%;">
         <b${taskStyle}>${escapeHtml(item.task)}</b>
-        <div style="display:flex; flex-wrap:wrap; align-items:center; gap:4px; margin-top:2px;">
-          ${buildOwnerChipsHtml(owners)}
-          <span style="color:var(--text-light); font-size:0.75rem;">· ${fmtDateIt(item.start)}–${fmtDateIt(item.end)}</span>
-          ${statusTag}
-        </div>
+        <div class="gantt-row-owners">${buildOwnerChipsHtml(owners)}</div>
+        <div class="gantt-row-dates">${fmtDateIt(item.start)}–${fmtDateIt(item.end)}</div>
+        <div class="gantt-row-status">${statusTag}</div>
       </span>`;
     container.appendChild(label);
 
