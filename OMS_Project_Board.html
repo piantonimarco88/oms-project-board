@@ -121,6 +121,18 @@
   /* Attività completata: barra piu' tenue (di qualunque priorità) con segno di spunta al
      centro, ed etichetta barrata a sinistra (vedi renderGantt). */
   .gantt-bar.status-completato{opacity:0.5; font-weight:700;}
+  .gantt-bar.status-in-corso{font-weight:700; box-shadow:inset 0 0 0 2px rgba(255,255,255,0.7), 0 1px 3px rgba(0,0,0,0.15);}
+  /* In ritardo: tratteggio diagonale + bordo scuro sopra il colore di priorità, cosi' risalta
+     indipendentemente da quale sia (rosso/ambra/verde). */
+  .gantt-bar.status-overdue{
+    font-weight:700;
+    background-image:repeating-linear-gradient(45deg, rgba(255,255,255,0.45) 0 6px, transparent 6px 12px);
+    box-shadow:inset 0 0 0 2px #7a1414, 0 1px 3px rgba(0,0,0,0.15);
+  }
+  .gantt-status-tag{font-size:0.68rem; font-weight:700; padding:1px 7px; border-radius:9px; white-space:nowrap;}
+  .gantt-status-tag.done{background:#e5f4ea; color:var(--green);}
+  .gantt-status-tag.progress{background:#fdf1de; color:var(--amber);}
+  .gantt-status-tag.overdue{background:#fbe3e2; color:#a12420;}
 
   /* Tabelle editabili (motore generico: Stakeholder, Sistemi, KPI, Roadmap, Rischi, RACI, Vendor, Business Case) */
   .edit-input, .edit-select{
@@ -304,10 +316,13 @@
   <div id="gantt-view" class="view">
     <section>
       <h2>📅 Gantt — Attività, Priorità, Scadenze, Assegnazioni</h2>
-      <div class="gantt-legend">
+      <div class="gantt-legend" style="flex-wrap:wrap; row-gap:8px;">
         <span><span class="legend-swatch" style="background:var(--red);"></span>Priorità Alta</span>
         <span><span class="legend-swatch" style="background:var(--amber);"></span>Priorità Media</span>
         <span><span class="legend-swatch" style="background:var(--green);"></span>Priorità Bassa</span>
+        <span style="border-left:1px solid var(--gray-border); padding-left:16px;">▶ In corso</span>
+        <span>⚠ In ritardo (tratteggio)</span>
+        <span>✓ Completata (barra tenue)</span>
       </div>
       <div class="gantt-grid" id="gantt-grid"></div>
       <p class="note">Le barre rappresentano l'intervallo di svolgimento di ciascuna attività, definito nella Vista Roadmap (colonne Inizio/Fine). Modifica le date lì per aggiornare automaticamente questo Gantt.</p>
@@ -1235,18 +1250,38 @@ function renderGantt(){
     const owners = item.owners || [];
     const ownerText = owners.length ? owners.join(", ") : "Da assegnare"; // solo per il tooltip (title)
 
+    // Stato visivo: completata / in corso / in ritardo (avrebbe dovuto iniziare ma e'
+    // ancora "da avviare") / da avviare nei tempi (nessuna etichetta: e' lo stato base).
     const isDone = item.status === "completato";
+    const isInProgress = item.status === "in-corso";
+    const isOverdue = !isDone && item.status === "da-avviare" && new Date(item.start) < today;
+
+    let statusClass = "", statusIcon = "", statusTag = "", statusTitle = "";
+    if(isDone){
+      statusClass = " status-completato"; statusIcon = "✓";
+      statusTag = '<span class="gantt-status-tag done">✓ Completata</span>';
+      statusTitle = " — Completata";
+    } else if(isOverdue){
+      statusClass = " status-overdue"; statusIcon = "⚠";
+      statusTag = '<span class="gantt-status-tag overdue">⚠ In ritardo</span>';
+      statusTitle = " — In ritardo (doveva partire il " + fmtDateIt(item.start) + ")";
+    } else if(isInProgress){
+      statusClass = " status-in-corso"; statusIcon = "▶";
+      statusTag = '<span class="gantt-status-tag progress">▶ In corso</span>';
+      statusTitle = " — In corso";
+    }
+
     const taskStyle = isDone ? ' style="text-decoration:line-through; color:var(--text-light);"' : "";
-    const doneMark = isDone ? "✓ " : "";
 
     const label = document.createElement("div");
     label.className = "gantt-cell-label";
     label.innerHTML = `
       <span style="width:100%;">
-        <b${taskStyle}>${doneMark}${escapeHtml(item.task)}</b>
+        <b${taskStyle}>${escapeHtml(item.task)}</b>
         <div style="display:flex; flex-wrap:wrap; align-items:center; gap:4px; margin-top:2px;">
           ${buildOwnerChipsHtml(owners)}
           <span style="color:var(--text-light); font-size:0.75rem;">· ${fmtDateIt(item.start)}–${fmtDateIt(item.end)}</span>
+          ${statusTag}
         </div>
       </span>`;
     container.appendChild(label);
@@ -1267,13 +1302,13 @@ function renderGantt(){
     const width = Math.max(1.5, ((end - start) / 86400000) / totalDays * 100);
 
     const bar = document.createElement("div");
-    bar.className = "gantt-bar prio-" + item.priority + (isDone ? " status-completato" : "");
+    bar.className = "gantt-bar prio-" + item.priority + statusClass;
     bar.style.left = left + "%";
     bar.style.width = width + "%";
-    // Nessun testo dentro le barre (restano "mute" e coerenti tra loro), tranne il segno di
-    // spunta per le attività completate: piu' scura/opaca e con la spunta al centro.
-    if(isDone) bar.textContent = "✓";
-    bar.title = `${item.task} — ${ownerText} — ${fmtDateIt(item.start)} → ${fmtDateIt(item.end)}` + (isDone ? " — Completata" : "");
+    // Nessun testo dentro le barre (restano "mute"), tranne una piccola icona di stato:
+    // spunta = completata, freccia = in corso, avviso = in ritardo.
+    if(statusIcon) bar.textContent = statusIcon;
+    bar.title = `${item.task} — ${ownerText} — ${fmtDateIt(item.start)} → ${fmtDateIt(item.end)}` + statusTitle;
     track.appendChild(bar);
 
     if(todayLeftPct !== null){
