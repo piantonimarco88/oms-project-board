@@ -137,8 +137,8 @@
   /* Le 3 righe (owner/date/stato) sotto il nome attivita' restano sempre nello stesso ordine
      e con la stessa spaziatura, cosi' tutte le righe del Gantt sono coerenti tra loro. */
   .gantt-row-owners{display:flex; flex-wrap:wrap; gap:4px; margin-top:4px; min-height:18px;}
-  .gantt-row-dates{color:var(--text-light); font-size:0.75rem; margin-top:3px;}
-  .gantt-row-status{margin-top:3px;}
+  .gantt-row-status{display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:3px;}
+  .gantt-row-dates{color:var(--text-light); font-size:0.75rem;}
 
   /* Tabelle editabili (motore generico: Stakeholder, Sistemi, KPI, Roadmap, Rischi, RACI, Vendor, Business Case) */
   .edit-input, .edit-select{
@@ -1291,8 +1291,10 @@ function renderGantt(){
       <span style="width:100%;">
         <b${taskStyle}>${escapeHtml(item.task)}</b>
         <div class="gantt-row-owners">${buildOwnerChipsHtml(owners)}</div>
-        <div class="gantt-row-dates">${fmtDateIt(item.start)}–${fmtDateIt(item.end)}</div>
-        <div class="gantt-row-status">${statusTag}</div>
+        <div class="gantt-row-status">
+          <span class="gantt-row-dates">${fmtDateIt(item.start)}–${fmtDateIt(item.end)}</span>
+          ${statusTag}
+        </div>
       </span>`;
     container.appendChild(label);
 
