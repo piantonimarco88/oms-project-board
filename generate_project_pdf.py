@@ -111,17 +111,17 @@ DEFAULT_VENDORS = [
     {"vendor": "Da definire", "fit": "media", "integrazione": "media", "costo": "Da definire", "note": "Sezione da popolare dopo lo studio di fattibilita'", "stato": "da-valutare"},
 ]
 
-LOG = [
-    ("15/07/2026",
-     "Ristrutturata la Project Board: aggiunte le sezioni Registro Rischi, Matrice RACI e Vendor/Opzioni OMS; "
-     "aggiunte colonne Baseline/Target ai KPI e Dipendenze al Roadmap; Stakeholder e Sistemi resi editabili come "
-     "le altre sezioni; Business Case riorganizzato in ottica CAPEX/OPEX/KPI."),
-    ("15/07/2026",
-     "Definito il pool di 9 risorse assegnabili come owner (KPI, Roadmap, Rischi, RACI): Paolo Zanco, Luigi Barra, "
-     "Marco Benasedo, Raul Simon, Alberto Sala, Claudia Sogus, Maja Sztekiel, Eugenio Frescura, Marco Piantoni."),
-    ("14/07/2026",
-     "Kick-off OMS: avviata analisi KPI proposti da Eugenio Frescura. Leadership assegnata (in attesa di conferma) "
-     "a Marco Piantoni, previo accordo con Paolo Zanco. Coinvolgimento di Claudia Sogus per input di business aggiuntivo."),
+DEFAULT_LOG = [
+    {"date": "15/07/2026",
+     "text": "Ristrutturata la Project Board: aggiunte le sezioni Registro Rischi, Matrice RACI e Vendor/Opzioni OMS; "
+             "aggiunte colonne Baseline/Target ai KPI e Dipendenze al Roadmap; Stakeholder e Sistemi resi editabili come "
+             "le altre sezioni; Business Case riorganizzato in ottica CAPEX/OPEX/KPI."},
+    {"date": "15/07/2026",
+     "text": "Definito il pool di 9 risorse assegnabili come owner (KPI, Roadmap, Rischi, RACI): Paolo Zanco, Luigi Barra, "
+             "Marco Benasedo, Raul Simon, Alberto Sala, Claudia Sogus, Maja Sztekiel, Eugenio Frescura, Marco Piantoni."},
+    {"date": "14/07/2026",
+     "text": "Kick-off OMS: avviata analisi KPI proposti da Eugenio Frescura. Leadership assegnata (in attesa di conferma) "
+             "a Marco Piantoni, previo accordo con Paolo Zanco. Coinvolgimento di Claudia Sogus per input di business aggiuntivo."},
 ]
 
 
@@ -144,6 +144,7 @@ def load_project_data():
         "raci": DEFAULT_RACI,
         "business": DEFAULT_BUSINESS,
         "vendor": DEFAULT_VENDORS,
+        "log": DEFAULT_LOG,
     }
     if backup_path:
         try:
@@ -295,8 +296,8 @@ def build_pdf(output_path="OMS_Project_Summary.pdf"):
 
     # --- Log Decisioni ---
     story.append(Paragraph("Log Decisioni", h2_style))
-    for date, text in LOG:
-        block = [Paragraph(date, log_date_style), Paragraph(text, log_text_style)]
+    for entry in data["log"]:
+        block = [Paragraph(entry["date"], log_date_style), Paragraph(entry["text"], log_text_style)]
         story.append(KeepTogether(block))
 
     doc.build(story)
