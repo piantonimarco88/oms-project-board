@@ -109,6 +109,7 @@
   }
   .gantt-month:last-child{border-right:none;}
   .gantt-cell-track{position:relative; border-bottom:1px solid var(--gray-border); min-height:41px;}
+  .gantt-month-line{position:absolute; top:0; bottom:0; width:0; border-left:1px dashed var(--gray-border); pointer-events:none;}
   .gantt-bar{
     position:absolute; top:50%; transform:translateY(-50%); height:25px; border-radius:6px; font-size:0.72rem; color:#fff;
     display:flex; align-items:center; justify-content:center; padding:0 8px; white-space:nowrap; overflow:hidden;
@@ -1188,6 +1189,15 @@ function renderGantt(){
   rangeEnd = new Date(rangeEnd.getFullYear(), rangeEnd.getMonth() + 1, 0);
   const totalDays = Math.max(1, (rangeEnd - rangeStart) / 86400000);
 
+  // Posizione (in %) del confine di fine mese, per le linee tratteggiate verticali ripetute
+  // in ogni riga (stessa scala giorni/percentuale delle barre).
+  const monthBoundaries = [];
+  let mcursor = new Date(rangeStart.getFullYear(), rangeStart.getMonth() + 1, 1);
+  while(mcursor < rangeEnd){
+    monthBoundaries.push((mcursor - rangeStart) / 86400000 / totalDays * 100);
+    mcursor = new Date(mcursor.getFullYear(), mcursor.getMonth() + 1, 1);
+  }
+
   // Marcatore della data odierna: calcolato una volta, riusato per la linea nell'header mesi
   // e per la linea ripetuta in ogni riga (cosi' attraversa visivamente tutto il Gantt).
   const now = new Date();
@@ -1243,6 +1253,13 @@ function renderGantt(){
 
     const track = document.createElement("div");
     track.className = "gantt-cell-track";
+
+    monthBoundaries.forEach(pct => {
+      const monthLine = document.createElement("div");
+      monthLine.className = "gantt-month-line";
+      monthLine.style.left = pct + "%";
+      track.appendChild(monthLine);
+    });
 
     const start = new Date(item.start);
     const end = new Date(item.end);
