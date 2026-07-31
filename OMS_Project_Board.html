@@ -58,10 +58,12 @@
   .note{font-size:0.82rem; color:var(--text-light); margin-top:8px;}
   .log-entry{border-left:3px solid var(--navy); padding:8px 14px; margin-bottom:14px; background:#fafbfd; border-radius:0 6px 6px 0;}
   .log-date{font-weight:700; color:var(--navy); font-size:0.85rem;}
-  .toolbar{position:fixed; top:8px; right:8px; z-index:99; display:flex; flex-direction:column; gap:4px;}
+  /* In flusso normale (non fixed): scorre via con la pagina invece di restare ancorata
+     sopra il contenuto durante lo scroll, dove finiva per coprire le tabelle sottostanti. */
+  .toolbar{display:flex; flex-direction:row; flex-wrap:wrap; justify-content:flex-end; gap:6px; margin-bottom:14px;}
   .toolbar-btn{
-    background:var(--navy); color:#fff; border:none; padding:3px 7px; border-radius:5px; cursor:pointer;
-    font-size:0.62rem; box-shadow:0 2px 6px rgba(0,0,0,0.2); text-align:left; white-space:nowrap;
+    background:var(--navy); color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer;
+    font-size:0.75rem; box-shadow:0 2px 6px rgba(0,0,0,0.15); text-align:center; white-space:nowrap;
   }
   .toolbar-btn:hover{background:var(--navy-dark);}
   .toolbar-btn.save{background:var(--green);}
@@ -178,15 +180,10 @@
     .table-scroll{overflow-x:visible !important;}
   }
 
-  /* Mobile: la toolbar fissa in alto a destra coprirebbe il titolo su schermi stretti,
-     quindi torna in flusso normale sopra l'header invece che sovrapposta. */
   @media (max-width: 700px){
     body{padding:14px;}
-    .toolbar{
-      position:static; flex-direction:row; flex-wrap:wrap; justify-content:center;
-      margin-bottom:14px;
-    }
-    .toolbar-btn{font-size:0.7rem;}
+    .toolbar{justify-content:center;}
+    .toolbar-btn{font-size:0.7rem; padding:5px 9px;}
     header{padding:18px 16px;}
     header h1{font-size:1.25rem;}
     header p{font-size:0.85rem;}
@@ -218,16 +215,16 @@
 </head>
 <body>
 
-<div class="toolbar no-print">
-  <button class="toolbar-btn" onclick="window.print()">🖨️ Stampa / Esporta PDF</button>
-  <button class="toolbar-btn save" onclick="exportAssignments()">💾 Salva Dati (backup)</button>
-  <button class="toolbar-btn load" onclick="triggerImport()">📂 Carica Dati Salvati</button>
-  <input type="file" id="import-file-input" accept="application/json,.json" style="display:none" onchange="handleImportFile(event)">
-</div>
-
 <div class="wrap">
 
   <div class="view-only-banner">🔒 Versione pubblicata — sola lettura. Le modifiche vanno fatte nel file locale.</div>
+
+  <div class="toolbar no-print">
+    <button class="toolbar-btn" onclick="window.print()">🖨️ Stampa / Esporta PDF</button>
+    <button class="toolbar-btn save" onclick="exportAssignments()">💾 Salva Dati (backup)</button>
+    <button class="toolbar-btn load" onclick="triggerImport()">📂 Carica Dati Salvati</button>
+    <input type="file" id="import-file-input" accept="application/json,.json" style="display:none" onchange="handleImportFile(event)">
+  </div>
 
   <header>
     <div>
