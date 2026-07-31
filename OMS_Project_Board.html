@@ -1235,13 +1235,20 @@ function renderGantt(){
 
   const monthsCell = document.createElement("div");
   monthsCell.className = "gantt-cell-months";
+  // Larghezza proporzionale ai giorni effettivi del mese (non equidistribuita), cosi' i
+  // separatori tra le celle dei mesi coincidono esattamente con le linee tratteggiate di
+  // fine mese nelle righe sottostanti: indicano lo stesso confine, devono allinearsi.
   let cursor = new Date(rangeStart);
   while(cursor <= rangeEnd){
+    const nextMonth = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+    const daysInMonth = (nextMonth - cursor) / 86400000;
+    const widthPct = daysInMonth / totalDays * 100;
     const m = document.createElement("div");
     m.className = "gantt-month";
+    m.style.flex = "0 0 " + widthPct + "%";
     m.textContent = MONTH_NAMES_IT[cursor.getMonth()] + " " + cursor.getFullYear();
     monthsCell.appendChild(m);
-    cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+    cursor = nextMonth;
   }
   if(todayLeftPct !== null){
     const todayLabel = document.createElement("div");
