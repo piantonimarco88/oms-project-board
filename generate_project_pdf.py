@@ -211,10 +211,15 @@ def build_pdf(output_path="OMS_Project_Summary.pdf"):
                              topMargin=1.8 * cm, bottomMargin=1.8 * cm,
                              leftMargin=1.6 * cm, rightMargin=1.6 * cm)
 
+    # "Ultimo aggiornamento" segue la voce piu' recente del log (la prima, dato che le nuove
+    # voci vengono aggiunte in cima nell'app), cosi' resta coerente con l'HTML senza doverlo
+    # allineare a mano ad ogni pubblicazione.
+    last_update = data["log"][0]["date"] if data["log"] else LAST_UPDATE
+
     story = []
     story.append(Paragraph("OMS - Valutazione Nuovo Order Management System", title_style))
     story.append(Paragraph("Allineamento OMS e analisi KPI - Strategia Omnichannel", subtitle_style))
-    story.append(Paragraph(f"Ultimo aggiornamento: <b>{LAST_UPDATE}</b> &nbsp;|&nbsp; Prossimo meeting: <b>{NEXT_MEETING}</b>", meta_style))
+    story.append(Paragraph(f"Ultimo aggiornamento: <b>{last_update}</b> &nbsp;|&nbsp; Prossimo meeting: <b>{NEXT_MEETING}</b>", meta_style))
 
     # --- Stakeholder ---
     story.append(Paragraph("Stakeholder", h2_style))

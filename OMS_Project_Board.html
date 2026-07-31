@@ -87,7 +87,7 @@
      quindi restano sempre allineate anche quando il testo dell'etichetta va a capo. */
   .gantt-grid{
     display:grid; grid-template-columns:340px minmax(0,1fr); border:1px solid var(--gray-border);
-    border-radius:8px; overflow-x:auto;
+    border-radius:8px; overflow-x:hidden;
   }
   .gantt-cell-label, .gantt-cell-header-label{
     padding:6px 12px; border-bottom:1px solid var(--gray-border); border-right:1px solid var(--gray-border);
@@ -215,6 +215,12 @@
     section{padding:16px 14px;}
     .tab-btn{padding:6px 9px; font-size:0.7rem;}
     .gantt-grid{grid-template-columns:220px minmax(0,1fr);}
+    /* Con molti mesi compressi in poco spazio l'etichetta (es. "AGO 2026") puo' andare a capo:
+       piu' spazio verticale e font piu' piccolo per non farla tagliare (i mesi sono
+       posizionati in absolute dentro .gantt-cell-months, quindi la sua altezza va data
+       esplicitamente, non si adatta da sola al contenuto). */
+    .gantt-cell-months{height:56px;}
+    .gantt-month{font-size:0.6rem; padding:6px 2px; white-space:normal; line-height:1.15;}
     table{min-width:700px;}
     .table-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch;}
   }
@@ -257,7 +263,7 @@
     </div>
     <div class="meta-box">
       <div class="badge">Fase: Analisi KPI &amp; Feasibility</div>
-      <p style="margin-top:8px;">Ultimo aggiornamento: <b>15/07/2026</b></p>
+      <p style="margin-top:8px;">Ultimo aggiornamento: <b id="last-update-date">—</b></p>
       <p>Prossimo meeting: <b>WK31 (27/07–02/08/2026)</b></p>
     </div>
   </header>
@@ -1107,6 +1113,14 @@ function renderLogTable(){
       ${escapeHtml(e.text)}
     </div>
   `).join("");
+
+  // "Ultimo aggiornamento" nell'header segue sempre la voce piu' recente del log (la prima,
+  // dato che le nuove voci vengono aggiunte in cima), cosi' le due date restano coerenti
+  // senza doverle allineare a mano ad ogni modifica.
+  const lastUpdateEl = document.getElementById("last-update-date");
+  if(lastUpdateEl){
+    lastUpdateEl.textContent = activityLog.length ? activityLog[0].date : "—";
+  }
 }
 
 // ---- Inizializzazione: header colonne + prima renderizzazione di tutte le tabelle ----
