@@ -1,0 +1,581 @@
+{
+  "kpis": [
+    {
+      "id": "k1",
+      "area": "Giacenze",
+      "kpi": "Overselling Rate",
+      "formula": "N. ordini annullati/rimborsati per mancanza stock nel giorno / Tot. ordini acquisiti nel giorno",
+      "fonte": "OMS",
+      "baseline": "",
+      "target": "",
+      "deadline": "WK35",
+      "owners": [
+        "Marco Benasedo",
+        "Raul Simon"
+      ]
+    },
+    {
+      "id": "k2",
+      "area": "Giacenze",
+      "kpi": "Inventory Sync Time",
+      "formula": "Tempo (media + p95) tra vendita/reso e aggiornamento stock pubblicato su .com/MKT",
+      "fonte": "OMS log",
+      "baseline": "",
+      "target": "",
+      "deadline": "WK35",
+      "owners": [
+        "Marco Benasedo",
+        "Raul Simon"
+      ]
+    },
+    {
+      "id": "k3",
+      "area": "Giacenze",
+      "kpi": "Disallineamento Inventariale",
+      "formula": "N. SKU con discrepanza fisico-teorica nel giorno / Tot. SKU verificati nel giorno",
+      "fonte": "Conteggi negozio + WMS",
+      "baseline": "",
+      "target": "",
+      "deadline": "WK35",
+      "owners": [
+        "Marco Benasedo",
+        "Raul Simon"
+      ]
+    },
+    {
+      "id": "k4",
+      "area": "Routing",
+      "kpi": "Split Order Rate",
+      "formula": "N. ordini splittati in ≥2 spedizioni nel giorno / Tot. ordini gestiti nel giorno",
+      "fonte": "OMS",
+      "baseline": "",
+      "target": "",
+      "deadline": "WK35",
+      "owners": [
+        "Marco Benasedo",
+        "Raul Simon"
+      ]
+    },
+    {
+      "id": "k5",
+      "area": "Routing",
+      "kpi": "Store Rejection Rate",
+      "formula": "N. rifiuti da personale negozio nel giorno / Tot. ordini indirizzati a negozio",
+      "fonte": "OMS + store ops",
+      "baseline": "",
+      "target": "",
+      "deadline": "WK31",
+      "owners": [
+        "Marco Piantoni"
+      ]
+    },
+    {
+      "id": "k6",
+      "area": "Routing",
+      "kpi": "Routing Time",
+      "formula": "Tempo (media + p95) per applicare regole business e determinare nodo logistico ottimale",
+      "fonte": "OMS",
+      "baseline": "",
+      "target": "",
+      "deadline": "WK35",
+      "owners": [
+        "Marco Benasedo",
+        "Raul Simon"
+      ]
+    },
+    {
+      "id": "k7",
+      "area": "Logistica",
+      "kpi": "Order Lead Time",
+      "formula": "Tempo (media + dev.std.) da conferma ordine sul sito a drop verso WMS/negozio",
+      "fonte": "OMS/WMS",
+      "baseline": "",
+      "target": "",
+      "deadline": "WK35",
+      "owners": [
+        "Marco Benasedo",
+        "Raul Simon"
+      ]
+    },
+    {
+      "id": "k8",
+      "area": "Logistica",
+      "kpi": "Order Touch Rate",
+      "formula": "N. ordini bloccati/modificati manualmente nel giorno / Tot. ordini gestiti dall'OMS",
+      "fonte": "OMS",
+      "baseline": "",
+      "target": "",
+      "deadline": "WK35",
+      "owners": [
+        "Marco Benasedo",
+        "Raul Simon",
+        "Maja Sztekiel"
+      ]
+    },
+    {
+      "id": "k9",
+      "area": "Cliente",
+      "kpi": "OTIF",
+      "formula": "N. ordini consegnati integri entro data promessa / Tot. ordini con consegna prevista nel giorno",
+      "fonte": "OMS/WMS",
+      "baseline": "",
+      "target": "",
+      "deadline": "WK31",
+      "owners": [
+        "Luigi Barra",
+        "Gianpiero Cervellera"
+      ]
+    },
+    {
+      "id": "k10",
+      "area": "Economico",
+      "kpi": "Costo per Ordine Gestito",
+      "formula": "(Costi OMS + costi operativi gestione ordine) / Tot. ordini gestiti",
+      "fonte": "Finance/IT",
+      "baseline": "",
+      "target": "",
+      "deadline": "Dopo business case",
+      "owners": []
+    },
+    {
+      "id": "k11",
+      "area": "Giacenze",
+      "kpi": "Safety Stock (buffer di sicurezza)",
+      "formula": "Numero di pezzi tenuti come margine di sicurezza per SKU/negozio, oltre lo stock realmente disponibile",
+      "fonte": "OMS/WMS",
+      "baseline": "Da rilevare",
+      "target": "2 pezzi (richiesta business, intervista Claudia Sogus)",
+      "owners": [],
+      "deadline": "Da definire"
+    }
+  ],
+  "roadmap": [
+    {
+      "id": "r1",
+      "task": "Conferma incarico leadership",
+      "priority": "alta",
+      "start": "2026-07-15",
+      "end": "2026-08-28",
+      "status": "in-corso",
+      "dependsOn": [
+        "Nessuno"
+      ],
+      "owners": [
+        "Paolo Zanco"
+      ]
+    },
+    {
+      "id": "r2",
+      "task": "Assegnazione owner KPI (pool 7 nominativi)",
+      "owners": [
+        "Marco Piantoni"
+      ],
+      "priority": "alta",
+      "start": "2026-07-15",
+      "end": "2026-07-26",
+      "status": "completato",
+      "dependsOn": [
+        "Nessuno"
+      ]
+    },
+    {
+      "id": "r3",
+      "task": "Raccolta e consolidamento dati KPI",
+      "owners": [
+        "Marco Piantoni"
+      ],
+      "priority": "alta",
+      "start": "2026-07-27",
+      "end": "2026-10-16",
+      "status": "in-corso",
+      "dependsOn": [
+        "Assegnazione owner KPI (pool 7 nominativi)"
+      ]
+    },
+    {
+      "id": "r4",
+      "task": "Intervista Claudia Sogus (business input)",
+      "owners": [
+        "Marco Piantoni",
+        "Claudia Sogus"
+      ],
+      "priority": "media",
+      "start": "2026-07-27",
+      "end": "2026-08-28",
+      "status": "completato",
+      "dependsOn": [
+        "Nessuno"
+      ]
+    },
+    {
+      "id": "r5",
+      "task": "Verifica completezza dati raccolti (riunione)",
+      "owners": [
+        "Marco Piantoni"
+      ],
+      "priority": "alta",
+      "start": "2026-10-16",
+      "end": "2026-10-23",
+      "status": "da-avviare",
+      "dependsOn": [
+        "Raccolta e consolidamento dati KPI",
+        "Intervista Claudia Sogus (business input)"
+      ]
+    },
+    {
+      "id": "r6",
+      "task": "Prima analisi dati raccolti",
+      "owners": [
+        "Marco Piantoni"
+      ],
+      "priority": "alta",
+      "start": "2026-10-23",
+      "end": "2026-11-06",
+      "status": "da-avviare",
+      "dependsOn": [
+        "Intervista Claudia Sogus (business input)",
+        "Verifica completezza dati raccolti (riunione)"
+      ]
+    }
+  ],
+  "stakeholders": [
+    {
+      "id": "s1",
+      "nome": "Luigi Barra",
+      "ruolo": "Chief Supply Chain Officer",
+      "coinvolgimento": "Convocatore kick-off / Sponsor de facto"
+    },
+    {
+      "id": "s2",
+      "nome": "Marco Piantoni",
+      "ruolo": "Project Leader (in conferma)",
+      "coinvolgimento": "Leadership analisi KPI — conferma attesa entro WK30 (previo accordo con Paolo Zanco)"
+    },
+    {
+      "id": "s3",
+      "nome": "Eugenio Frescura",
+      "ruolo": "Proponente KPI",
+      "coinvolgimento": "Ha definito la proposta di KPI minimi da monitorare"
+    },
+    {
+      "id": "s4",
+      "nome": "Paolo Zanco",
+      "ruolo": "Stakeholder",
+      "coinvolgimento": "Validazione assegnazione leadership"
+    },
+    {
+      "id": "s5",
+      "nome": "Marco Benasedo",
+      "ruolo": "Stakeholder",
+      "coinvolgimento": "Partecipante kick-off"
+    },
+    {
+      "id": "s6",
+      "nome": "Claudia Sogus",
+      "ruolo": "Business Input",
+      "coinvolgimento": "Intervista dedicata per spunti di business aggiuntivo (WK31)"
+    },
+    {
+      "id": "s7",
+      "nome": "Raul Simon",
+      "ruolo": "Da chiarire",
+      "coinvolgimento": "Owner KPI (pool assegnazione)"
+    },
+    {
+      "id": "s8",
+      "nome": "Alberto Sala",
+      "ruolo": "Da chiarire",
+      "coinvolgimento": "Owner KPI (pool assegnazione)"
+    },
+    {
+      "id": "s9",
+      "nome": "Maja Sztekiel",
+      "ruolo": "Da chiarire",
+      "coinvolgimento": "Owner KPI (pool assegnazione)"
+    },
+    {
+      "id": "s10",
+      "nome": "Gianpiero Cervellera",
+      "ruolo": "Da definire",
+      "coinvolgimento": "Owner KPI (pool assegnazione)"
+    }
+  ],
+  "sistemi": [
+    {
+      "id": "sy1",
+      "sistema": "OMS attuale",
+      "ruolo": "Orchestrazione ordini omnichannel — oggetto della valutazione di sostituzione/upgrade"
+    },
+    {
+      "id": "sy2",
+      "sistema": ".com / Marketplace (MKT)",
+      "ruolo": "Canali di vendita online da sincronizzare con lo stock"
+    },
+    {
+      "id": "sy3",
+      "sistema": "WMS",
+      "ruolo": "Gestione magazzino — stock fisico teorico"
+    },
+    {
+      "id": "sy4",
+      "sistema": "Sistema negozi (\"XY\" / \"St3k\")",
+      "ruolo": "Stock fisico negozio — nome sistema da confermare"
+    },
+    {
+      "id": "sy5",
+      "sistema": "Calcolo stock disponibile",
+      "ruolo": "Necessità (da intervista Claudia Sogus): calcolo il più accurato e frequente possibile, per evitare assegnazioni multiple allo stesso negozio per mancanza di visibilità sullo stock reale."
+    },
+    {
+      "id": "sy6",
+      "sistema": "Stato ordine / tracking",
+      "ruolo": "Necessità (da intervista Claudia Sogus): aggiornamento dello stato ordine solido e allineato tra tutti i sistemi coinvolti (OMS, corrieri, negozi)."
+    },
+    {
+      "id": "sy7",
+      "sistema": "Consolidamento spedizioni",
+      "ruolo": "Necessità (da intervista Claudia Sogus): priorità ad accorpare le spedizioni per minimizzare il numero di pacchi per ordine (collegato al KPI Split Order Rate)."
+    },
+    {
+      "id": "sy8",
+      "sistema": "Gestione picchi di volume / code",
+      "ruolo": "Necessità (da intervista Claudia Sogus): l'OMS deve poter prioritizzare assegnazioni e attività in caso di picco di volume o coda; ipotesi di servizio a pagamento per il cliente per garantire priorità."
+    },
+    {
+      "id": "sy9",
+      "sistema": "Dashboard operativa",
+      "ruolo": "Necessità (da intervista Claudia Sogus): dashboard generale con indicazioni operative su problemi e ritardi in corso."
+    }
+  ],
+  "risks": [
+    {
+      "id": "rk1",
+      "rischio": "Sistema negozi non identificato con certezza (\"XY\" / \"St3k\")",
+      "categoria": "dati",
+      "impatto": "media",
+      "probabilita": "alta",
+      "mitigazione": "Confermare nome e owner del sistema entro WK31",
+      "stato": "aperto",
+      "owners": [
+        "Eugenio Frescura"
+      ]
+    },
+    {
+      "id": "rk2",
+      "rischio": "Ritardo nella conferma della leadership di progetto",
+      "categoria": "organizzativo",
+      "impatto": "media",
+      "probabilita": "media",
+      "mitigazione": "Sollecitare accordo Piantoni/Zanco entro WK30",
+      "owners": [
+        "Marco Piantoni",
+        "Paolo Zanco"
+      ],
+      "stato": "aperto"
+    },
+    {
+      "id": "rk3",
+      "rischio": "Dati storici KPI non disponibili o incompleti",
+      "categoria": "dati",
+      "impatto": "alta",
+      "probabilita": "media",
+      "mitigazione": "Setup dedicato di raccolta per i KPI privi di storico affidabile",
+      "owners": [
+        "Marco Benasedo",
+        "Raul Simon",
+        "Alberto Sala",
+        "Marco Piantoni"
+      ],
+      "stato": "aperto"
+    },
+    {
+      "id": "rk4",
+      "rischio": "Ritardi di consegna per negozi lenti nell'accettazione ordine o pacchi non ritirati dai corrieri, senza alert automatico",
+      "categoria": "organizzativo",
+      "impatto": "media",
+      "probabilita": "media",
+      "mitigazione": "Richiesta esplicita (intervista Claudia Sogus): il nuovo OMS deve generare alert automatici in questi casi per contenere l'impatto sul tempo di consegna finale.",
+      "owners": [],
+      "stato": "aperto"
+    }
+  ],
+  "raci": [
+    {
+      "id": "ra1",
+      "decisione": "Conferma incarico leadership progetto",
+      "responsible": [
+        "Marco Piantoni"
+      ],
+      "accountable": [
+        "Paolo Zanco"
+      ],
+      "consulted": [
+        "Luigi Barra"
+      ],
+      "informed": [
+        "Marco Benasedo",
+        "Claudia Sogus"
+      ]
+    },
+    {
+      "id": "ra2",
+      "decisione": "Approvazione budget OMS",
+      "accountable": [
+        "Luigi Barra"
+      ],
+      "consulted": [
+        "Paolo Zanco",
+        "Raul Simon",
+        "Claudia Sogus",
+        "Eugenio Frescura",
+        "Marco Piantoni"
+      ],
+      "informed": [
+        "Alberto Sala",
+        "Claudia Sogus",
+        "Maja Sztekiel"
+      ],
+      "responsible": [
+        "Marco Benasedo"
+      ]
+    },
+    {
+      "id": "ra3",
+      "decisione": "Scelta vendor/soluzione OMS",
+      "responsible": [
+        "Paolo Zanco",
+        "Luigi Barra",
+        "Marco Benasedo",
+        "Eugenio Frescura",
+        "Marco Piantoni"
+      ],
+      "accountable": [
+        "Luigi Barra"
+      ],
+      "consulted": [
+        "Paolo Zanco",
+        "Luigi Barra",
+        "Marco Benasedo",
+        "Raul Simon",
+        "Alberto Sala",
+        "Claudia Sogus",
+        "Maja Sztekiel",
+        "Eugenio Frescura",
+        "Marco Piantoni"
+      ],
+      "informed": [
+        "Alberto Sala",
+        "Claudia Sogus",
+        "Maja Sztekiel"
+      ]
+    }
+  ],
+  "business": [
+    {
+      "id": "b1",
+      "voce": "Implementazione / System Integration",
+      "categoria": "capex",
+      "asis": "—",
+      "tobe": "Da benchmark mercato"
+    },
+    {
+      "id": "b2",
+      "voce": "Licenza software OMS (annua)",
+      "categoria": "opex",
+      "asis": "Dato mancante",
+      "tobe": "Da benchmark mercato"
+    },
+    {
+      "id": "b3",
+      "voce": "Manutenzione e supporto (annuo)",
+      "categoria": "opex",
+      "asis": "Dato mancante",
+      "tobe": "Da benchmark mercato"
+    },
+    {
+      "id": "b4",
+      "voce": "Volume ordini/giorno",
+      "categoria": "kpi",
+      "asis": "Dato mancante",
+      "tobe": "—"
+    },
+    {
+      "id": "b5",
+      "voce": "Costo per Ordine Gestito",
+      "categoria": "kpi",
+      "asis": "Dato mancante",
+      "tobe": "Da stimare post KPI"
+    },
+    {
+      "id": "b6",
+      "voce": "Overselling Rate",
+      "categoria": "kpi",
+      "asis": "In raccolta (WK31→)",
+      "tobe": "Target da definire"
+    },
+    {
+      "id": "b7",
+      "voce": "OTIF",
+      "categoria": "kpi",
+      "asis": "In raccolta (WK31→)",
+      "tobe": "Target da definire"
+    }
+  ],
+  "vendor": [
+    {
+      "id": "v1",
+      "vendor": "Da definire",
+      "fit": "media",
+      "integrazione": "media",
+      "costo": "Da definire",
+      "note": "Sezione da popolare dopo lo studio di fattibilità",
+      "stato": "da-valutare"
+    }
+  ],
+  "log": [
+    {
+      "date": "27/08/2026",
+      "text": "Completata intervista a Claudia Sogus (business input) su necessità operative per il nuovo OMS. Punti salienti: (1) calcolo stock disponibile il più accurato e frequente possibile, per evitare assegnazioni multiple allo stesso negozio; (2) riduzione della safety stock, idealmente a 2 pezzi; (3) aggiornamento stato ordine solido e allineato tra sistemi; (4) priorità ad accorpare le spedizioni per minimizzare il numero di pacchi; (5) necessità di alert per negozi lenti nell'accettazione o pacchi non ritirati dai corrieri; (6) OMS che prioritizzi assegnazioni/attività in caso di picco volumi o coda, ipotesi di servizio a pagamento per il cliente; (7) dashboard operativa generale su problemi e ritardi. Aggiunte righe corrispondenti in Sistemi & Pain Point, KPI e Rischi; attività Roadmap segnata come completata."
+    },
+    {
+      "date": "31/07/2026",
+      "text": "🔧 Roadmap — \"Raccolta e consolidamento dati KPI\": Stato da \"Da avviare\" a \"In corso\""
+    },
+    {
+      "date": "31/07/2026",
+      "text": "🔧 Roadmap — \"Intervista Claudia Sogus (business input)\": Stato da \"Da avviare\" a \"In corso\""
+    },
+    {
+      "date": "31/07/2026",
+      "text": "🔧 Roadmap — \"Prima analisi dati raccolti\": Fine da \"23/10/2026\" a \"06/11/2026\""
+    },
+    {
+      "date": "31/07/2026",
+      "text": "🔧 Roadmap — \"Prima analisi dati raccolti\": Inizio da \"14/09/2026\" a \"23/10/2026\""
+    },
+    {
+      "date": "31/07/2026",
+      "text": "🔧 Roadmap — \"Verifica completezza dati raccolti (riunione)\": Fine da \"16/10/2026\" a \"23/10/2026\""
+    },
+    {
+      "date": "31/07/2026",
+      "text": "🔧 Roadmap — \"Verifica completezza dati raccolti (riunione)\": Inizio da \"11/09/2026\" a \"16/10/2026\""
+    },
+    {
+      "date": "15/07/2026",
+      "text": "Ristrutturata la Project Board: aggiunte le sezioni Registro Rischi, Matrice RACI e Vendor/Opzioni OMS; aggiunte colonne Baseline/Target ai KPI e Dipendenze al Roadmap; Stakeholder e Sistemi resi editabili come le altre sezioni; Business Case riorganizzato in ottica CAPEX/OPEX/KPI. Motore di tabella unificato per tutte le sezioni editabili."
+    },
+    {
+      "date": "15/07/2026",
+      "text": "Definito il pool di 9 risorse assegnabili come owner (KPI, Roadmap, Rischi, RACI): Paolo Zanco, Luigi Barra, Marco Benasedo, Raul Simon, Alberto Sala, Claudia Sogus, Maja Sztekiel, Eugenio Frescura, Marco Piantoni. Assegnazione riga-per-riga gestita direttamente in questa app."
+    },
+    {
+      "date": "15/07/2026",
+      "text": "L'assegnazione owner KPI non sarà univoca ma per singolo KPI — persone diverse possono coprire raccolta dato e calcolo/validazione a seconda dell'area. Deadline target assegnazione: entro WK30 (26/07/2026)."
+    },
+    {
+      "date": "14/07/2026",
+      "text": "Kick-off OMS: avviata analisi KPI proposti da Eugenio Frescura. Leadership assegnata (in attesa di conferma) a Marco Piantoni, previo accordo con Paolo Zanco. Coinvolgimento di Claudia Sogus per input di business aggiuntivo."
+    }
+  ]
+}

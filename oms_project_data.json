@@ -136,6 +136,17 @@
       "target": "",
       "deadline": "Dopo business case",
       "owners": []
+    },
+    {
+      "id": "k11",
+      "area": "Giacenze",
+      "kpi": "Safety Stock (buffer di sicurezza)",
+      "formula": "Numero di pezzi tenuti come margine di sicurezza per SKU/negozio, oltre lo stock realmente disponibile",
+      "fonte": "OMS/WMS",
+      "baseline": "Da rilevare",
+      "target": "2 pezzi (richiesta business, intervista Claudia Sogus)",
+      "owners": [],
+      "deadline": "Da definire"
     }
   ],
   "roadmap": [
@@ -191,7 +202,7 @@
       "priority": "media",
       "start": "2026-07-27",
       "end": "2026-08-28",
-      "status": "in-corso",
+      "status": "completato",
       "dependsOn": [
         "Nessuno"
       ]
@@ -309,6 +320,31 @@
       "id": "sy4",
       "sistema": "Sistema negozi (\"XY\" / \"St3k\")",
       "ruolo": "Stock fisico negozio — nome sistema da confermare"
+    },
+    {
+      "id": "sy5",
+      "sistema": "Calcolo stock disponibile",
+      "ruolo": "Necessità (da intervista Claudia Sogus): calcolo il più accurato e frequente possibile, per evitare assegnazioni multiple allo stesso negozio per mancanza di visibilità sullo stock reale."
+    },
+    {
+      "id": "sy6",
+      "sistema": "Stato ordine / tracking",
+      "ruolo": "Necessità (da intervista Claudia Sogus): aggiornamento dello stato ordine solido e allineato tra tutti i sistemi coinvolti (OMS, corrieri, negozi)."
+    },
+    {
+      "id": "sy7",
+      "sistema": "Consolidamento spedizioni",
+      "ruolo": "Necessità (da intervista Claudia Sogus): priorità ad accorpare le spedizioni per minimizzare il numero di pacchi per ordine (collegato al KPI Split Order Rate)."
+    },
+    {
+      "id": "sy8",
+      "sistema": "Gestione picchi di volume / code",
+      "ruolo": "Necessità (da intervista Claudia Sogus): l'OMS deve poter prioritizzare assegnazioni e attività in caso di picco di volume o coda; ipotesi di servizio a pagamento per il cliente per garantire priorità."
+    },
+    {
+      "id": "sy9",
+      "sistema": "Dashboard operativa",
+      "ruolo": "Necessità (da intervista Claudia Sogus): dashboard generale con indicazioni operative su problemi e ritardi in corso."
     }
   ],
   "risks": [
@@ -350,6 +386,16 @@
         "Alberto Sala",
         "Marco Piantoni"
       ],
+      "stato": "aperto"
+    },
+    {
+      "id": "rk4",
+      "rischio": "Ritardi di consegna per negozi lenti nell'accettazione ordine o pacchi non ritirati dai corrieri, senza alert automatico",
+      "categoria": "organizzativo",
+      "impatto": "media",
+      "probabilita": "media",
+      "mitigazione": "Richiesta esplicita (intervista Claudia Sogus): il nuovo OMS deve generare alert automatici in questi casi per contenere l'impatto sul tempo di consegna finale.",
+      "owners": [],
       "stato": "aperto"
     }
   ],
@@ -487,6 +533,10 @@
     }
   ],
   "log": [
+    {
+      "date": "27/08/2026",
+      "text": "Completata intervista a Claudia Sogus (business input) su necessità operative per il nuovo OMS. Punti salienti: (1) calcolo stock disponibile il più accurato e frequente possibile, per evitare assegnazioni multiple allo stesso negozio; (2) riduzione della safety stock, idealmente a 2 pezzi; (3) aggiornamento stato ordine solido e allineato tra sistemi; (4) priorità ad accorpare le spedizioni per minimizzare il numero di pacchi; (5) necessità di alert per negozi lenti nell'accettazione o pacchi non ritirati dai corrieri; (6) OMS che prioritizzi assegnazioni/attività in caso di picco volumi o coda, ipotesi di servizio a pagamento per il cliente; (7) dashboard operativa generale su problemi e ritardi. Aggiunte righe corrispondenti in Sistemi & Pain Point, KPI e Rischi; attività Roadmap segnata come completata."
+    },
     {
       "date": "31/07/2026",
       "text": "🔧 Roadmap — \"Raccolta e consolidamento dati KPI\": Stato da \"Da avviare\" a \"In corso\""
