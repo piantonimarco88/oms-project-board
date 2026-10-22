@@ -31,7 +31,7 @@ GRAY_BG = colors.HexColor("#eef1f6")
 LIGHT_BORDER = colors.HexColor("#dfe4ec")
 
 LAST_UPDATE = "15/07/2026"
-NEXT_MEETING = "WK31 (27/07-02/08/2026)"
+NEXT_MEETING = "Metà novembre 2026 (incontro con tutti)"
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
