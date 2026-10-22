@@ -64,7 +64,7 @@ DEFAULT_SISTEMI = [
 ]
 
 DEFAULT_KPIS = [
-    {"area": "Giacenze", "kpi": "Overselling Rate", "formula": "N. ordini annullati/rimborsati per mancanza stock nel giorno / Tot. ordini acquisiti nel giorno", "fonte": "OMS", "baseline": "", "target": "", "owners": [], "deadline": "WK31"},
+    {"area": "Giacenze", "kpi": "Overselling Rate", "formula": "N. ordini non completi per mancanza stock nel giorno / Tot. ordini acquisiti nel giorno", "fonte": "OMS", "baseline": "", "target": "", "owners": [], "deadline": "WK31"},
     {"area": "Giacenze", "kpi": "Inventory Sync Time", "formula": "Tempo (media + p95) tra vendita/reso e aggiornamento stock pubblicato su .com/MKT", "fonte": "OMS log", "baseline": "", "target": "", "owners": [], "deadline": "WK31"},
     {"area": "Giacenze", "kpi": "Disallineamento Inventariale", "formula": "N. SKU con discrepanza fisico-teorica nel giorno / Tot. SKU verificati nel giorno", "fonte": "Conteggi negozio + WMS", "baseline": "", "target": "", "owners": [], "deadline": "WK31"},
     {"area": "Routing", "kpi": "Split Order Rate", "formula": "N. ordini splittati in due o piu spedizioni nel giorno / Tot. ordini gestiti nel giorno", "fonte": "OMS", "baseline": "", "target": "", "owners": [], "deadline": "WK31"},

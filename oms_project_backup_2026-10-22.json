@@ -4,7 +4,7 @@
       "id": "k1",
       "area": "Giacenze",
       "kpi": "Overselling Rate",
-      "formula": "N. ordini annullati/rimborsati per mancanza stock nel giorno / Tot. ordini acquisiti nel giorno",
+      "formula": "N. ordini non completi per mancanza stock nel giorno / Tot. ordini acquisiti nel giorno",
       "fonte": "OMS",
       "baseline": "",
       "target": "",
@@ -156,7 +156,7 @@
       "priority": "alta",
       "start": "2026-07-15",
       "end": "2026-08-28",
-      "status": "in-corso",
+      "status": "completato",
       "dependsOn": [
         "Nessuno"
       ],
@@ -561,6 +561,14 @@
     }
   ],
   "log": [
+    {
+      "date": "22/10/2026",
+      "text": "A metà novembre è previsto un nuovo incontro con tutti i partecipanti al progetto."
+    },
+    {
+      "date": "22/10/2026",
+      "text": "🔧 Roadmap — \"Conferma incarico leadership\": Stato da \"In corso\" a \"Completato\""
+    },
     {
       "date": "22/10/2026",
       "text": "🔧 Roadmap — \"Prima analisi dati raccolti\": Fine da \"06/11/2026\" a \"04/12/2026\""

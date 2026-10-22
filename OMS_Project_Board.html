@@ -819,7 +819,7 @@ registerTable("sistemi", {
 const KPI_STORAGE_KEY = "oms_kpi_data_v1";
 const LEGACY_OWNER_KEY = "oms_kpi_owners_v1"; // formato precedente (solo assegnazioni), usato per migrazione
 const DEFAULT_KPIS = [
-  {id:"k1", area:"Giacenze", kpi:"Overselling Rate", formula:"N. ordini annullati/rimborsati per mancanza stock nel giorno / Tot. ordini acquisiti nel giorno", fonte:"OMS", baseline:"", target:"", deadline:"WK31"},
+  {id:"k1", area:"Giacenze", kpi:"Overselling Rate", formula:"N. ordini non completi per mancanza stock nel giorno / Tot. ordini acquisiti nel giorno", fonte:"OMS", baseline:"", target:"", deadline:"WK31"},
   {id:"k2", area:"Giacenze", kpi:"Inventory Sync Time", formula:"Tempo (media + p95) tra vendita/reso e aggiornamento stock pubblicato su .com/MKT", fonte:"OMS log", baseline:"", target:"", deadline:"WK31"},
   {id:"k3", area:"Giacenze", kpi:"Disallineamento Inventariale", formula:"N. SKU con discrepanza fisico-teorica nel giorno / Tot. SKU verificati nel giorno", fonte:"Conteggi negozio + WMS", baseline:"", target:"", deadline:"WK31"},
   {id:"k4", area:"Routing", kpi:"Split Order Rate", formula:"N. ordini splittati in ≥2 spedizioni nel giorno / Tot. ordini gestiti nel giorno", fonte:"OMS", baseline:"", target:"", deadline:"WK31"},
