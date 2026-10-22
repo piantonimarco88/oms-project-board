@@ -208,6 +208,34 @@
       ]
     },
     {
+      "id": "r7",
+      "task": "Call con BI: studio dettagli calcolo KPI",
+      "owners": [
+        "Marco Piantoni"
+      ],
+      "priority": "alta",
+      "start": "2026-10-21",
+      "end": "2026-10-21",
+      "status": "completato",
+      "dependsOn": [
+        "Raccolta e consolidamento dati KPI"
+      ]
+    },
+    {
+      "id": "r8",
+      "task": "Aggiornamento con BI sul calcolo KPI",
+      "owners": [
+        "Marco Piantoni"
+      ],
+      "priority": "alta",
+      "start": "2026-10-29",
+      "end": "2026-10-29",
+      "status": "da-avviare",
+      "dependsOn": [
+        "Call con BI: studio dettagli calcolo KPI"
+      ]
+    },
+    {
       "id": "r5",
       "task": "Verifica completezza dati raccolti (riunione)",
       "owners": [
@@ -533,6 +561,10 @@
     }
   ],
   "log": [
+    {
+      "date": "21/10/2026",
+      "text": "Svolta call con BI per lo studio di dettaglio del calcolo dei KPI. Prossimo aggiornamento con BI fissato per il 29/10/2026. Roadmap/Gantt aggiornati con la call (completata) e con la milestone di aggiornamento del 29/10."
+    },
     {
       "date": "27/08/2026",
       "text": "Completata intervista a Claudia Sogus (business input) su necessità operative per il nuovo OMS. Punti salienti: (1) calcolo stock disponibile il più accurato e frequente possibile, per evitare assegnazioni multiple allo stesso negozio; (2) riduzione della safety stock, idealmente a 2 pezzi; (3) aggiornamento stato ordine solido e allineato tra sistemi; (4) priorità ad accorpare le spedizioni per minimizzare il numero di pacchi; (5) necessità di alert per negozi lenti nell'accettazione o pacchi non ritirati dai corrieri; (6) OMS che prioritizzi assegnazioni/attività in caso di picco volumi o coda, ipotesi di servizio a pagamento per il cliente; (7) dashboard operativa generale su problemi e ritardi. Aggiunte righe corrispondenti in Sistemi & Pain Point, KPI e Rischi; attività Roadmap segnata come completata."
