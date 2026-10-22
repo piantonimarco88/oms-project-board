@@ -186,7 +186,7 @@
       ],
       "priority": "alta",
       "start": "2026-07-27",
-      "end": "2026-10-16",
+      "end": "2026-11-13",
       "status": "in-corso",
       "dependsOn": [
         "Assegnazione owner KPI (pool 7 nominativi)"
@@ -242,8 +242,8 @@
         "Marco Piantoni"
       ],
       "priority": "alta",
-      "start": "2026-10-16",
-      "end": "2026-10-23",
+      "start": "2026-11-13",
+      "end": "2026-11-20",
       "status": "da-avviare",
       "dependsOn": [
         "Raccolta e consolidamento dati KPI",
@@ -257,8 +257,8 @@
         "Marco Piantoni"
       ],
       "priority": "alta",
-      "start": "2026-10-23",
-      "end": "2026-11-06",
+      "start": "2026-11-20",
+      "end": "2026-12-04",
       "status": "da-avviare",
       "dependsOn": [
         "Intervista Claudia Sogus (business input)",
@@ -561,6 +561,26 @@
     }
   ],
   "log": [
+    {
+      "date": "22/10/2026",
+      "text": "🔧 Roadmap — \"Prima analisi dati raccolti\": Fine da \"06/11/2026\" a \"04/12/2026\""
+    },
+    {
+      "date": "22/10/2026",
+      "text": "🔧 Roadmap — \"Prima analisi dati raccolti\": Inizio da \"23/10/2026\" a \"20/11/2026\""
+    },
+    {
+      "date": "22/10/2026",
+      "text": "🔧 Roadmap — \"Verifica completezza dati raccolti (riunione)\": Fine da \"23/10/2026\" a \"20/11/2026\""
+    },
+    {
+      "date": "22/10/2026",
+      "text": "🔧 Roadmap — \"Verifica completezza dati raccolti (riunione)\": Inizio da \"16/10/2026\" a \"13/11/2026\""
+    },
+    {
+      "date": "22/10/2026",
+      "text": "🔧 Roadmap — \"Raccolta e consolidamento dati KPI\": Fine da \"16/10/2026\" a \"13/11/2026\""
+    },
     {
       "date": "21/10/2026",
       "text": "Svolta call con BI per lo studio di dettaglio del calcolo dei KPI. Prossimo aggiornamento con BI fissato per il 29/10/2026. Roadmap/Gantt aggiornati con la call (completata) e con la milestone di aggiornamento del 29/10."
