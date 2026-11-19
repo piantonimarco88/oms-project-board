@@ -4,7 +4,7 @@ Strumento di project management per la valutazione di un nuovo Order Management 
 
 ## Contenuto
 
-- **`OMS_Project_Board.html`** — app interattiva: Stakeholder, Sistemi & Pain Point, KPI, Roadmap, Gantt, Registro Rischi, Matrice RACI, Business Case, Vendor/Opzioni, Log Decisioni. Aggiungere/rimuovere uno Stakeholder aggiorna automaticamente l'elenco nomi selezionabile in tutti i menu owner (KPI, Roadmap, Rischi, RACI).
+- **`OMS_Project_Board.html`** — app interattiva: Stakeholder, Sistemi & Pain Point, KPI, Benchmark KPI, Roadmap, Gantt, Registro Rischi, Matrice RACI, Business Case, Vendor/Opzioni, Log Decisioni. Aggiungere/rimuovere uno Stakeholder aggiorna automaticamente l'elenco nomi selezionabile in tutti i menu owner (KPI, Roadmap, Rischi, RACI).
 - **`oms_project_data.json`** — dati "pubblicati": è il file che l'app carica automaticamente quando viene aperta dal link GitHub Pages (vedi sotto). Va tenuto aggiornato manualmente quando si vuole condividere un nuovo stato.
 - **`oms_project_backup_*.json`** — export puntuali con data (bottone "💾 Salva Dati" nell'app), utili come cronologia/backup personale.
 - **`generate_project_pdf.py`** — genera `OMS_Project_Summary.pdf` a partire dall'ultimo backup JSON presente nella cartella (richiede `reportlab`: `pip install reportlab`).

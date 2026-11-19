@@ -37,6 +37,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # ---- Mappe etichette (allineate a quelle della Project Board HTML) ----
 LEVEL_LABELS = {"alta": "Alta", "media": "Media", "bassa": "Bassa"}
+BENCH_LABELS = {"critico": "Critico", "da-migliorare": "Da migliorare", "in-linea": "In linea", "da-misurare": "Da misurare"}
 STATUS_LABELS = {"da-avviare": "Da avviare", "in-corso": "In corso", "completato": "Completato"}
 RISK_CATEGORY_LABELS = {"tecnico": "Tecnico", "organizzativo": "Organizzativo", "dati": "Dati", "fornitore": "Fornitore"}
 RISK_STATUS_LABELS = {"aperto": "Aperto", "mitigato": "Mitigato", "chiuso": "Chiuso"}
@@ -246,6 +247,20 @@ def build_pdf(output_path="OMS_Project_Summary.pdf"):
         rows.append([k["area"], k["kpi"], k["formula"], k["fonte"], k.get("baseline") or "-",
                      k.get("target") or "-", owners_join(k.get("owners")), k["deadline"]])
     story.append(make_table(rows, [1.7 * cm, 2.2 * cm, 4.6 * cm, 1.8 * cm, 1.6 * cm, 1.6 * cm, 2.4 * cm, 1.5 * cm], font_size=7.2))
+
+    # --- Benchmark & criticita' KPI (solo i KPI con una valutazione) ---
+    bm = [k for k in data["kpis"] if k.get("valutazione")]
+    if bm:
+        story.append(PageBreak())
+        story.append(Paragraph("Benchmark &amp; Criticita' KPI", h2_style))
+        rows = [["KPI", "Boggi 2026", "Stato", "Riferimenti esterni", "Criticita' / lettura", "Target (12 mesi / 24-36 mesi)"]]
+        for k in bm:
+            rows.append([k["kpi"], k.get("baseline") or "-", BENCH_LABELS.get(k["valutazione"], k["valutazione"]),
+                         k.get("benchmark") or "-", k.get("criticita") or "-", k.get("target") or "-"])
+        story.append(make_table(rows, [2.2 * cm, 2.0 * cm, 1.6 * cm, 4.4 * cm, 4.4 * cm, 3.2 * cm], font_size=6.8))
+        story.append(Paragraph("Fonte: report Benchmark accademici e di settore per i KPI dell'OMS (9/11/2026) e presentazione OMS "
+                               "Performance Review. I target sono proposte da validare con il team e con i fornitori di OMS.", note_style))
+        story.append(PageBreak())
 
     # --- Roadmap ---
     story.append(Paragraph("Roadmap / Action Plan", h2_style))
