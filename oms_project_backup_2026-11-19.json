@@ -8,7 +8,7 @@
       "fonte": "OMS",
       "baseline": "",
       "target": "",
-      "deadline": "WK35",
+      "deadline": "19/11/2026",
       "owners": [
         "Marco Benasedo",
         "Raul Simon"
@@ -22,7 +22,7 @@
       "fonte": "OMS log",
       "baseline": "",
       "target": "",
-      "deadline": "WK35",
+      "deadline": "19/11/2026",
       "owners": [
         "Marco Benasedo",
         "Raul Simon"
@@ -36,7 +36,7 @@
       "fonte": "Conteggi negozio + WMS",
       "baseline": "",
       "target": "",
-      "deadline": "WK35",
+      "deadline": "19/11/2026",
       "owners": [
         "Marco Benasedo",
         "Raul Simon"
@@ -50,7 +50,7 @@
       "fonte": "OMS",
       "baseline": "",
       "target": "",
-      "deadline": "WK35",
+      "deadline": "19/11/2026",
       "owners": [
         "Marco Benasedo",
         "Raul Simon"
@@ -64,7 +64,7 @@
       "fonte": "OMS + store ops",
       "baseline": "",
       "target": "",
-      "deadline": "WK31",
+      "deadline": "19/11/2026",
       "owners": [
         "Marco Piantoni"
       ]
@@ -77,7 +77,7 @@
       "fonte": "OMS",
       "baseline": "",
       "target": "",
-      "deadline": "WK35",
+      "deadline": "19/11/2026",
       "owners": [
         "Marco Benasedo",
         "Raul Simon"
@@ -91,7 +91,7 @@
       "fonte": "OMS/WMS",
       "baseline": "",
       "target": "",
-      "deadline": "WK35",
+      "deadline": "19/11/2026",
       "owners": [
         "Marco Benasedo",
         "Raul Simon"
@@ -105,7 +105,7 @@
       "fonte": "OMS",
       "baseline": "",
       "target": "",
-      "deadline": "WK35",
+      "deadline": "19/11/2026",
       "owners": [
         "Marco Benasedo",
         "Raul Simon",
@@ -120,7 +120,7 @@
       "fonte": "OMS/WMS",
       "baseline": "",
       "target": "",
-      "deadline": "WK31",
+      "deadline": "19/11/2026",
       "owners": [
         "Luigi Barra",
         "Gianpiero Cervellera"
@@ -244,7 +244,7 @@
       "priority": "alta",
       "start": "2026-11-13",
       "end": "2026-11-20",
-      "status": "da-avviare",
+      "status": "in-corso",
       "dependsOn": [
         "Raccolta e consolidamento dati KPI",
         "Intervista Claudia Sogus (business input)"
@@ -561,6 +561,14 @@
     }
   ],
   "log": [
+    {
+      "date": "19/11/2026",
+      "text": "🔧 KPI — scadenze aggiornate al 19/11/2026 (riunione di verifica completezza dati) per 9 KPI, in precedenza WK31/WK35. Al 12/11 numeri disponibili per tutti i KPI richiesti tranne 2."
+    },
+    {
+      "date": "19/11/2026",
+      "text": "🔧 Roadmap — \"Verifica completezza dati raccolti (riunione)\": Stato da \"Da avviare\" a \"In corso\""
+    },
     {
       "date": "19/11/2026",
       "text": "🔧 Roadmap — \"Raccolta e consolidamento dati KPI\": Stato da \"In corso\" a \"Completato\""
