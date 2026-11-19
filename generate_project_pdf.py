@@ -38,6 +38,8 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 # ---- Mappe etichette (allineate a quelle della Project Board HTML) ----
 LEVEL_LABELS = {"alta": "Alta", "media": "Media", "bassa": "Bassa"}
 BENCH_LABELS = {"critico": "Critico", "da-migliorare": "Da migliorare", "in-linea": "In linea", "da-misurare": "Da misurare"}
+BENCH_COLORS = {"critico": colors.HexColor("#fbe0de"), "da-migliorare": colors.HexColor("#fcefd2"),
+                "in-linea": colors.HexColor("#dff2e5"), "da-misurare": colors.HexColor("#eceff3")}
 STATUS_LABELS = {"da-avviare": "Da avviare", "in-corso": "In corso", "completato": "Completato"}
 RISK_CATEGORY_LABELS = {"tecnico": "Tecnico", "organizzativo": "Organizzativo", "dati": "Dati", "fornitore": "Fornitore"}
 RISK_STATUS_LABELS = {"aperto": "Aperto", "mitigato": "Mitigato", "chiuso": "Chiuso"}
@@ -166,7 +168,7 @@ def owners_join(values):
     return ", ".join(values) if values else "Da assegnare"
 
 
-def make_table(data, col_widths, header_bg=NAVY, font_size=8.5):
+def make_table(data, col_widths, header_bg=NAVY, font_size=8.5, extra_style=None):
     style = getSampleStyleSheet()
     cell_style = ParagraphStyle("cell", parent=style["Normal"], fontSize=font_size, leading=font_size + 3)
     header_style = ParagraphStyle("header", parent=style["Normal"], fontSize=font_size,
@@ -190,7 +192,7 @@ def make_table(data, col_widths, header_bg=NAVY, font_size=8.5):
         ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
         ("LEFTPADDING", (0, 0), (-1, -1), 6),
         ("RIGHTPADDING", (0, 0), (-1, -1), 6),
-    ]))
+    ] + (extra_style or [])))
     return t
 
 
@@ -242,22 +244,31 @@ def build_pdf(output_path="OMS_Project_Summary.pdf"):
 
     # --- KPI ---
     story.append(Paragraph("KPI &amp; Assegnazione Owner", h2_style))
-    rows = [["Area", "KPI", "Formula", "Fonte", "Baseline", "Target", "Owner", "Deadline"]]
+    rows = [["Area", "KPI", "Formula", "Fonte", "Baseline", "Target 12 mesi", "Target 24-36 mesi", "Owner", "Deadline"]]
     for k in data["kpis"]:
         rows.append([k["area"], k["kpi"], k["formula"], k["fonte"], k.get("baseline") or "-",
-                     k.get("target") or "-", owners_join(k.get("owners")), k["deadline"]])
-    story.append(make_table(rows, [1.7 * cm, 2.2 * cm, 4.6 * cm, 1.8 * cm, 1.6 * cm, 1.6 * cm, 2.4 * cm, 1.5 * cm], font_size=7.2))
+                     k.get("target") or "-", k.get("target36") or "-", owners_join(k.get("owners")), k["deadline"]])
+    story.append(make_table(rows, [1.5 * cm, 2.0 * cm, 3.8 * cm, 1.5 * cm, 1.6 * cm, 1.6 * cm, 1.6 * cm, 2.2 * cm, 1.5 * cm], font_size=6.8))
 
     # --- Benchmark & criticita' KPI (solo i KPI con una valutazione) ---
     bm = [k for k in data["kpis"] if k.get("valutazione")]
     if bm:
         story.append(PageBreak())
         story.append(Paragraph("Benchmark &amp; Criticita' KPI", h2_style))
-        rows = [["KPI", "Boggi 2026", "Stato", "Riferimenti esterni", "Criticita' / lettura", "Target (12 mesi / 24-36 mesi)"]]
-        for k in bm:
-            rows.append([k["kpi"], k.get("baseline") or "-", BENCH_LABELS.get(k["valutazione"], k["valutazione"]),
-                         k.get("benchmark") or "-", k.get("criticita") or "-", k.get("target") or "-"])
-        story.append(make_table(rows, [2.2 * cm, 2.0 * cm, 1.6 * cm, 4.4 * cm, 4.4 * cm, 3.2 * cm], font_size=6.8))
+        rows = [["KPI", "Boggi 2026", "Benchmark", "Stato", "Obiettivo 12 mesi", "Obiettivo 24-36 mesi", "Criticita' / lettura", "Fonti e riferimenti"]]
+        extra = []
+        for i, k in enumerate(bm, start=1):
+            rows.append([k["kpi"], k.get("baseline") or "-", k.get("benchmarkVal") or "-",
+                         BENCH_LABELS.get(k["valutazione"], k["valutazione"]),
+                         k.get("target") or "-", k.get("target36") or "-",
+                         k.get("criticita") or "-", k.get("benchmark") or "-"])
+            fill = BENCH_COLORS.get(k["valutazione"])
+            if fill:
+                extra.append(("BACKGROUND", (1, i), (1, i), fill))
+                extra.append(("BACKGROUND", (3, i), (3, i), fill))
+            extra.append(("BACKGROUND", (2, i), (2, i), colors.HexColor("#e7effa")))
+        story.append(make_table(rows, [1.8 * cm, 1.8 * cm, 2.2 * cm, 1.3 * cm, 1.9 * cm, 1.9 * cm, 3.5 * cm, 3.4 * cm],
+                                font_size=6.2, extra_style=extra))
         story.append(Paragraph("Fonte: report Benchmark accademici e di settore per i KPI dell'OMS (9/11/2026) e presentazione OMS "
                                "Performance Review. I target sono proposte da validare con il team e con i fornitori di OMS.", note_style))
         story.append(PageBreak())

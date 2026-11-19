@@ -80,8 +80,19 @@
   .bm-legend{font-size:0.78rem; color:var(--text-light); margin:8px 0;}
   .bm-dot{display:inline-block; width:10px; height:10px; border-radius:50%; vertical-align:middle; margin-right:3px;}
   .bm-critico{background:#d9534f;} .bm-da-migliorare{background:#e8a33d;} .bm-in-linea{background:#4fa36b;} .bm-da-misurare{background:#9aa3b2;}
-  select.bm-sel{font-weight:700; color:#fff; border:none;}
-  select.bm-sel.bm-da-migliorare{color:#3b2a00;}
+  #benchmark-view td.bm-c-meas{font-weight:700;}
+  #benchmark-view td.bm-v-critico{background:#fbe0de; box-shadow:inset 4px 0 0 #d9534f;}
+  #benchmark-view td.bm-v-da-migliorare{background:#fcefd2; box-shadow:inset 4px 0 0 #e8a33d;}
+  #benchmark-view td.bm-v-in-linea{background:#dff2e5; box-shadow:inset 4px 0 0 #4fa36b;}
+  #benchmark-view td.bm-v-da-misurare{background:#eceff3; box-shadow:inset 4px 0 0 #9aa3b2;}
+  #benchmark-view td.bm-c-ref{background:#e7effa;}
+  #benchmark-view td.bm-c-tgt{background:#f4f6f9;}
+  #benchmark-view td.bm-v-critico .edit-input, #benchmark-view td.bm-v-critico .edit-select{color:#8f2a26;}
+  #benchmark-view td.bm-v-da-migliorare .edit-input, #benchmark-view td.bm-v-da-migliorare .edit-select{color:#7a5300;}
+  #benchmark-view td.bm-v-in-linea .edit-input, #benchmark-view td.bm-v-in-linea .edit-select{color:#276b3f;}
+  #benchmark-view td.bm-v-da-misurare .edit-input, #benchmark-view td.bm-v-da-misurare .edit-select{color:#4b5565;}
+  #benchmark-view td.bm-c-meas .edit-input, #benchmark-view td.bm-c-meas .edit-select{background:transparent; border-color:transparent; font-weight:700;}
+  #benchmark-view td.bm-c-ref .edit-input, #benchmark-view td.bm-c-tgt .edit-input{background:transparent; border-color:transparent;}
   .bm-insight{margin-top:18px; padding:14px 18px; background:#fff; border:1px solid var(--gray-border); border-left:5px solid var(--navy); border-radius:8px;}
   .bm-insight h3{font-size:0.95rem; color:var(--navy); margin-bottom:6px;}
   .bm-insight ul{padding-left:18px; font-size:0.85rem; line-height:1.5;}
@@ -331,7 +342,7 @@
   <div id="benchmark-view" class="view">
   <section>
     <h2>📈 Benchmark &amp; Criticità KPI</h2>
-    <p class="note">Posizionamento dei KPI Boggi 2026 rispetto a letteratura accademica, benchmark di settore (WERC, APQC, MRC) e dati dei fornitori di OMS. Valori, valutazione e target sono gli stessi della sezione KPI e si modificano da lì (baseline/target) o direttamente qui (benchmark, valutazione, criticità). I target sono proposte da validare con il team e con i fornitori. Fonte: report "Benchmark accademici e di settore per i KPI dell'OMS" (9/11/2026) e presentazione OMS Performance Review.</p>
+    <p class="note">Posizionamento dei KPI Boggi 2026 rispetto a letteratura accademica, benchmark di settore (WERC, APQC, MRC) e dati dei fornitori di OMS. Il colore di "Boggi 2026" indica il grado di criticità; "Benchmark" (azzurro) e gli obiettivi sono affiancati per il confronto. I dati sono gli stessi della sezione KPI e si modificano da lì o direttamente qui. I target sono proposte da validare con il team e con i fornitori. Fonte: report "Benchmark accademici e di settore per i KPI dell'OMS" (9/11/2026) e presentazione OMS Performance Review.</p>
     <div class="bm-legend no-print">
       <span class="bm-dot bm-critico"></span> Critico &nbsp;
       <span class="bm-dot bm-da-migliorare"></span> Da migliorare / approfondire &nbsp;
@@ -870,23 +881,26 @@ const DEFAULT_KPIS = [
 const KPI_COLUMNS = [
   {field:"area", label:"Area", type:"text", width:"10%"},
   {field:"kpi", label:"KPI", type:"text", width:"12%"},
-  {field:"formula", label:"Formula", type:"textarea", width:"16%"},
-  {field:"fonte", label:"Fonte Dato", type:"text", width:"9%"},
-  {field:"baseline", label:"Baseline", type:"text", width:"8%"},
-  {field:"target", label:"Target", type:"text", width:"8%"},
-  {field:"owners", label:"Owner", type:"picker", options: OWNERS, width:"16%", logChanges:true},
+  {field:"formula", label:"Formula", type:"textarea", width:"14%"},
+  {field:"fonte", label:"Fonte Dato", type:"text", width:"8%"},
+  {field:"baseline", label:"Baseline", type:"textarea", width:"8%"},
+  {field:"target", label:"Target 12 mesi", type:"textarea", width:"8%"},
+  {field:"target36", label:"Target 24–36 mesi", type:"textarea", width:"8%"},
+  {field:"owners", label:"Owner", type:"picker", options: OWNERS, width:"14%", logChanges:true},
   {field:"deadline", label:"Deadline", type:"text", width:"8%"}
 ];
 const BENCH_VALUTAZIONE_LABELS = {
   "critico": "Critico", "da-migliorare": "Da migliorare", "in-linea": "In linea", "da-misurare": "Da misurare"
 };
 const BENCHMARK_COLUMNS = [
-  {field:"kpi", label:"KPI", type:"text", width:"11%"},
-  {field:"baseline", label:"Boggi 2026", type:"textarea", width:"9%"},
+  {field:"kpi", label:"KPI", type:"text", width:"10%"},
+  {field:"baseline", label:"Boggi 2026", type:"textarea", width:"10%"},
+  {field:"benchmarkVal", label:"Benchmark", type:"textarea", width:"11%"},
   {field:"valutazione", label:"Valutazione", type:"select", options: BENCH_VALUTAZIONE_LABELS, width:"10%", logChanges:true},
-  {field:"benchmark", label:"Riferimenti (accademici, di settore, fornitori)", type:"textarea", width:"22%"},
-  {field:"criticita", label:"Criticità / lettura", type:"textarea", width:"22%"},
-  {field:"target", label:"Target proposto (12 mesi · 24–36 mesi)", type:"textarea", width:"18%"}
+  {field:"target", label:"Obiettivo 12 mesi", type:"textarea", width:"11%"},
+  {field:"target36", label:"Obiettivo 24–36 mesi", type:"textarea", width:"11%"},
+  {field:"criticita", label:"Criticità / lettura", type:"textarea", width:"20%"},
+  {field:"benchmark", label:"Fonti e dettaglio riferimenti", type:"textarea", width:"17%"}
 ];
 function loadKpiData(){
   const picked = pickSharedOrLocal(KPI_STORAGE_KEY, SHARED_DATA && SHARED_DATA.kpis);
@@ -909,8 +923,20 @@ function renderKpiTable(){
 function renderBenchmarkTable(){
   const rows = kpiData.filter(k => k.valutazione);
   renderEditableTable("benchmark-body", rows, BENCHMARK_COLUMNS, "kpi", saveKpiData, renderKpiTable, {noDelete: true});
-  document.querySelectorAll('#benchmark-body select[data-field="valutazione"]').forEach(sel => {
-    sel.classList.add("bm-sel", "bm-" + sel.value);
+  // Colora le celle in base alla valutazione: "Boggi 2026" e "Valutazione" con il colore del
+  // grado di criticita', "Benchmark" e obiettivi con tinte neutre, cosi' il confronto
+  // misurato-vs-riferimento si legge a colpo d'occhio.
+  const cls = {baseline:"bm-c-meas", benchmarkVal:"bm-c-ref", valutazione:"bm-c-meas", target:"bm-c-tgt", target36:"bm-c-tgt"};
+  document.querySelectorAll("#benchmark-body tr.screen-row").forEach((tr, i) => {
+    const row = rows[i];
+    if(!row) return;
+    BENCHMARK_COLUMNS.forEach((col, ci) => {
+      const c = cls[col.field];
+      if(!c) return;
+      const td = tr.children[ci];
+      td.classList.add(c);
+      if(c === "bm-c-meas") td.classList.add("bm-v-" + row.valutazione);
+    });
   });
 }
 registerTable("kpi", {

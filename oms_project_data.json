@@ -7,7 +7,7 @@
       "formula": "N. ordini non completi per mancanza stock nel giorno / Tot. ordini acquisiti nel giorno",
       "fonte": "OMS",
       "baseline": "3,25%",
-      "target": "12 mesi: ≤ 2,0% · 24–36 mesi: ≤ 1,0% (best practice ≤ 0,5%)",
+      "target": "≤ 2,0%",
       "deadline": "19/11/2026",
       "owners": [
         "Marco Benasedo",
@@ -15,7 +15,9 @@
       ],
       "valutazione": "critico",
       "benchmark": "Fornitori (OneStock): Jigsaw < 2%, TFG London < 0,5% di cancellazioni online. Accademico: case study < 2% con sync real-time (fonte debole).",
-      "criticita": "Circa 1 ordine su 31 viene annullato, contro valori sotto il 2% dichiarati per retailer fashion UK con OMS moderni. Con un disallineamento del 2% la causa più probabile è la latenza (routing e sync)."
+      "criticita": "Circa 1 ordine su 31 viene annullato, contro valori sotto il 2% dichiarati per retailer fashion UK con OMS moderni. Con un disallineamento del 2% la causa più probabile è la latenza (routing e sync).",
+      "target36": "≤ 1,0% (best practice ≤ 0,5%)",
+      "benchmarkVal": "< 2% (Jigsaw) · < 0,5% (TFG London)"
     },
     {
       "id": "k2",
@@ -24,7 +26,7 @@
       "formula": "Tempo (media + p95) tra vendita/reso e aggiornamento stock pubblicato su .com/MKT",
       "fonte": "OMS log",
       "baseline": "Da calcolare (deep dive)",
-      "target": "12 mesi: media ≤ 5 min · p95 ≤ 15 min · 24–36 mesi: media ≤ 60 s · p95 ≤ 5 min (event-driven)",
+      "target": "media ≤ 5 min · p95 ≤ 15 min",
       "deadline": "03/12/2026",
       "owners": [
         "Marco Benasedo",
@@ -32,7 +34,9 @@
       ],
       "valutazione": "da-misurare",
       "benchmark": "Fornitori: gli OMS tradizionali sincronizzano lo stock dei negozi ogni ora o una volta al giorno; soluzioni a eventi in ~5 min (Pipe17); casi sotto i 5 s (claim di prodotto, fonti deboli).",
-      "criticita": "Prima va strumentata la misura: timestamp evento → stock pubblicato su .com e marketplace."
+      "criticita": "Prima va strumentata la misura: timestamp evento → stock pubblicato su .com e marketplace.",
+      "target36": "media ≤ 60 s · p95 ≤ 5 min (event-driven)",
+      "benchmarkVal": "Ogni ora o giornaliero (OMS tradizionali) · ~5 min (a eventi)"
     },
     {
       "id": "k3",
@@ -41,7 +45,7 @@
       "formula": "N. SKU con discrepanza fisico-teorica nel giorno / Tot. SKU verificati nel giorno",
       "fonte": "Conteggi negozio + WMS",
       "baseline": "2,04%",
-      "target": "12 mesi: magazzino ≤ 0,5% · negozi ≤ 3% con copertura completa · 24–36 mesi: magazzino ≤ 0,2% (WERC) · negozi ≤ 2% (con RFID)",
+      "target": "magazzino ≤ 0,5% · negozi ≤ 3% con copertura completa",
       "deadline": "19/11/2026",
       "owners": [
         "Marco Benasedo",
@@ -49,7 +53,9 @@
       ],
       "valutazione": "da-migliorare",
       "benchmark": "WERC: accuratezza best-in-class del magazzino ≥ 99,8% (discrepanza ≤ 0,2%). Negozi: 63% → 95% di accuratezza con RFID (Auburn RFID Lab); 65% di record inaccurati (DeHoratius & Raman 2008).",
-      "criticita": "Da scomporre per nodo: per il magazzino il 2,04% è sopra la soglia best-in-class WERC (0,2%); per i negozi sarebbe ottimo ma non è coerente con un rifiuto del 27,1%. Serve il dato separato per nodo (WMS, XY, St3k) e la verifica del campione contato."
+      "criticita": "Da scomporre per nodo: per il magazzino il 2,04% è sopra la soglia best-in-class WERC (0,2%); per i negozi sarebbe ottimo ma non è coerente con un rifiuto del 27,1%. Serve il dato separato per nodo (WMS, XY, St3k) e la verifica del campione contato.",
+      "target36": "magazzino ≤ 0,2% (WERC) · negozi ≤ 2% (con RFID)",
+      "benchmarkVal": "Magazzino ≤ 0,2% (WERC) · negozi con RFID ~5%"
     },
     {
       "id": "k4",
@@ -58,7 +64,7 @@
       "formula": "N. ordini splittati in ≥2 spedizioni nel giorno / Tot. ordini gestiti nel giorno",
       "fonte": "OMS",
       "baseline": "15,5%",
-      "target": "12 mesi: ≤ 12% · 24–36 mesi: ≤ 10%",
+      "target": "≤ 12%",
       "deadline": "19/11/2026",
       "owners": [
         "Marco Benasedo",
@@ -66,7 +72,9 @@
       ],
       "valutazione": "da-migliorare",
       "benchmark": "Nessun benchmark accademico. Prassi 3PL: < 5–8% 'sano' (fonte debole, riferita a magazzini senza negozi).",
-      "criticita": "Con il ship-from-store uno split più alto è fisiologico, ma va riletto sui soli ordini multi-capo. Una parte è probabilmente generata dai rifiuti dei negozi."
+      "criticita": "Con il ship-from-store uno split più alto è fisiologico, ma va riletto sui soli ordini multi-capo. Una parte è probabilmente generata dai rifiuti dei negozi.",
+      "target36": "≤ 10%",
+      "benchmarkVal": "< 5–8% (prassi 3PL, fonte debole)"
     },
     {
       "id": "k5",
@@ -75,14 +83,16 @@
       "formula": "N. rifiuti da personale negozio nel giorno / Tot. ordini indirizzati a negozio",
       "fonte": "OMS + store ops",
       "baseline": "27,1%",
-      "target": "12 mesi: ≤ 12% · 24–36 mesi: ≤ 5% (allineato al magazzino)",
+      "target": "≤ 12%",
       "deadline": "19/11/2026",
       "owners": [
         "Marco Piantoni"
       ],
       "valutazione": "critico",
       "benchmark": "Das et al. 2022: pick failure fino al 20% in retailer USA di fascia alta; altri studi: successo del picking 35–60%. Riferimento interno: rifiuto magazzino 4,48%.",
-      "criticita": "Supera anche il valore massimo osservato in letteratura (20%) ed è 6 volte il tasso del magazzino. È il KPI con il maggiore effetto a cascata su overselling, split, lead time e OTIF."
+      "criticita": "Supera anche il valore massimo osservato in letteratura (20%) ed è 6 volte il tasso del magazzino. È il KPI con il maggiore effetto a cascata su overselling, split, lead time e OTIF.",
+      "target36": "≤ 5% (allineato al magazzino)",
+      "benchmarkVal": "Max 20% (Das et al. 2022) · magazzino Boggi 4,48%"
     },
     {
       "id": "k12",
@@ -91,12 +101,14 @@
       "formula": "N. rifiuti da magazzino nel giorno / Tot. ordini indirizzati a magazzino",
       "fonte": "OMS",
       "baseline": "4,48%",
-      "target": "12 mesi: ≤ 2% · 24–36 mesi: ≤ 0,8% (best-in-class WERC)",
+      "target": "≤ 2%",
       "owners": [],
       "deadline": "19/11/2026",
       "valutazione": "da-migliorare",
       "benchmark": "WERC: order fill rate best-in-class ≥ 99,2% (rifiuto o mancata evasione equivalente ≤ 0,8%).",
-      "criticita": "Oltre 5 volte la soglia best-in-class e sopra il disallineamento misurato: pesano anche capi danneggiati, ubicazioni errate e riserve non allineate."
+      "criticita": "Oltre 5 volte la soglia best-in-class e sopra il disallineamento misurato: pesano anche capi danneggiati, ubicazioni errate e riserve non allineate.",
+      "target36": "≤ 0,8% (best-in-class WERC)",
+      "benchmarkVal": "≤ 0,8% (WERC best-in-class)"
     },
     {
       "id": "k6",
@@ -105,7 +117,7 @@
       "formula": "Tempo (media + p95) per applicare regole business e determinare nodo logistico ottimale",
       "fonte": "OMS",
       "baseline": "Media 223 min · p95 1.257 min (~21 h)",
-      "target": "12 mesi: media ≤ 15 min · p95 ≤ 60 min · 24–36 mesi: media < 1 min · p95 < 5 min",
+      "target": "media ≤ 15 min · p95 ≤ 60 min",
       "deadline": "19/11/2026",
       "owners": [
         "Marco Benasedo",
@@ -113,7 +125,9 @@
       ],
       "valutazione": "critico",
       "benchmark": "APQC 2026: conferma d'ordine mediana 1 ora lavorativa, top ≤ 45 min (campione prevalentemente B2B). Fornitori: disponibilità interrogata in 10 ms (Fluent, solo latenza di lettura).",
-      "criticita": "Un'assegnazione che richiede ore indica elaborazioni batch o code di attesa (pagamento, frode, orari dei nodi). Anche il solo avvio del routing supera la mediana APQC per la conferma dell'ordine."
+      "criticita": "Un'assegnazione che richiede ore indica elaborazioni batch o code di attesa (pagamento, frode, orari dei nodi). Anche il solo avvio del routing supera la mediana APQC per la conferma dell'ordine.",
+      "target36": "media < 1 min · p95 < 5 min",
+      "benchmarkVal": "Mediana 60 min · top ≤ 45 min (APQC)"
     },
     {
       "id": "k7",
@@ -122,7 +136,7 @@
       "formula": "Tempo (media + dev.std.) da conferma ordine sul sito a drop verso WMS/negozio",
       "fonte": "OMS/WMS",
       "baseline": "Media 319 min · dev. st. 937 min",
-      "target": "12 mesi: media ≤ 90 min · p95 ≤ 6 h · 24–36 mesi: media ≤ 30 min · p95 ≤ 2 h",
+      "target": "media ≤ 90 min · p95 ≤ 6 h",
       "deadline": "19/11/2026",
       "owners": [
         "Marco Benasedo",
@@ -130,7 +144,9 @@
       ],
       "valutazione": "critico",
       "benchmark": "APQC 2026: conferma d'ordine top ≤ 45 min. WERC: ordini pronti per la spedizione in tempo, best-in-class ≥ 99,48%.",
-      "criticita": "Critico per la variabilità: il routing pesa circa il 70% del lead time medio (223 su 319 min). Coefficiente di variazione ≈ 2,9 con coda lunga: conviene comunicare mediana e p95 invece di media e deviazione standard."
+      "criticita": "Critico per la variabilità: il routing pesa circa il 70% del lead time medio (223 su 319 min). Coefficiente di variazione ≈ 2,9 con coda lunga: conviene comunicare mediana e p95 invece di media e deviazione standard.",
+      "target36": "media ≤ 30 min · p95 ≤ 2 h",
+      "benchmarkVal": "Top ≤ 45 min (APQC, conferma ordine)"
     },
     {
       "id": "k8",
@@ -139,7 +155,7 @@
       "formula": "N. ordini bloccati/modificati manualmente nel giorno / Tot. ordini gestiti dall'OMS",
       "fonte": "OMS",
       "baseline": "Da calcolare (deep dive)",
-      "target": "12 mesi: baseline in 3 mesi, poi ≤ 5% · 24–36 mesi: ≤ 2%",
+      "target": "baseline in 3 mesi, poi ≤ 5%",
       "deadline": "03/12/2026",
       "owners": [
         "Marco Benasedo",
@@ -148,7 +164,9 @@
       ],
       "valutazione": "da-misurare",
       "benchmark": "MRC/Visa 2025: in media il 23% degli ordini è rivisto manualmente per frode, solo il 3% presso i membri MRC. APQC: con più ordini evasi senza intervento umano il perfect order sale a 96 (contro 90).",
-      "criticita": "Da misurare con causali obbligatorie: frode, pagamento, indirizzo, errore di sistema, riassegnazione manuale."
+      "criticita": "Da misurare con causali obbligatorie: frode, pagamento, indirizzo, errore di sistema, riassegnazione manuale.",
+      "target36": "≤ 2%",
+      "benchmarkVal": "23% medio · 3% membri MRC (revisione manuale per frode)"
     },
     {
       "id": "k9",
@@ -156,8 +174,8 @@
       "kpi": "OTIF",
       "formula": "N. ordini consegnati integri entro data promessa / Tot. ordini con consegna prevista nel giorno",
       "fonte": "OMS/WMS",
-      "baseline": "",
-      "target": "12 mesi: ≥ 92% (sopra la mediana APQC) · 24–36 mesi: ≥ 95–97% (top quartile APQC)",
+      "baseline": "Da misurare",
+      "target": "≥ 92% (sopra la mediana APQC)",
       "deadline": "19/11/2026",
       "owners": [
         "Luigi Barra",
@@ -165,7 +183,9 @@
       ],
       "valutazione": "da-misurare",
       "benchmark": "APQC 2026: OTIF mediana 90%, top 95%. WERC: spedizioni puntuali ≥ 99,2%. Vettori USA nel picco 2025: 94–97% (ShipMatrix).",
-      "criticita": "Da misurare a livello di ordine: 'in full' significa tutte le spedizioni dell'ordine consegnate entro la data promessa."
+      "criticita": "Da misurare a livello di ordine: 'in full' significa tutte le spedizioni dell'ordine consegnate entro la data promessa.",
+      "target36": "≥ 95–97% (top quartile APQC)",
+      "benchmarkVal": "Mediana 90% · top 95% (APQC)"
     },
     {
       "id": "k10",
@@ -646,6 +666,10 @@
     }
   ],
   "log": [
+    {
+      "date": "19/11/2026",
+      "text": "🔧 KPI — OTIF: baseline segnata \"Da misurare\" (numero non ancora disponibile). Nel tab Benchmark KPI separate le colonne Boggi 2026, Benchmark, Obiettivo a 12 mesi e Obiettivo a 24–36 mesi, con colori in base al grado di criticità."
+    },
     {
       "date": "19/11/2026",
       "text": "📈 Benchmark KPI — integrati nella Board i dati del report \"Benchmark accademici e di settore per i KPI dell'OMS\" (9/11/2026) e della presentazione OMS Performance Review: valori Boggi 2026, riferimenti esterni, valutazione e target a 12 e 24–36 mesi. Critici: Store Rejection Rate (27,1%), Routing Time (223 min medi, p95 ~21 h), Overselling (3,25%) e variabilità dell'Order Lead Time; da scomporre il Disallineamento (2,04%); da misurare Inventory Sync Time, Order Touch Rate e OTIF. Aggiunto il KPI Warehouse Rejection Rate (4,48%). Metriche guida proposte: Store Rejection Rate e Routing Time p95. I target sono proposte da validare con il team e con i fornitori."
