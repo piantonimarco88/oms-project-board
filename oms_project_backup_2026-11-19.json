@@ -244,10 +244,39 @@
       "priority": "alta",
       "start": "2026-11-13",
       "end": "2026-11-20",
-      "status": "in-corso",
+      "status": "completato",
       "dependsOn": [
         "Raccolta e consolidamento dati KPI",
         "Intervista Claudia Sogus (business input)"
+      ]
+    },
+    {
+      "id": "r9",
+      "task": "Deep dive KPI Inventory Sync Time e Order Touch Rate",
+      "owners": [
+        "Marco Piantoni"
+      ],
+      "priority": "alta",
+      "start": "2026-11-19",
+      "end": "2026-12-03",
+      "status": "in-corso",
+      "dependsOn": [
+        "Verifica completezza dati raccolti (riunione)"
+      ]
+    },
+    {
+      "id": "r10",
+      "task": "Applicazione benchmark ai KPI già calcolati",
+      "owners": [
+        "Marco Piantoni",
+        "Eugenio Frescura"
+      ],
+      "priority": "alta",
+      "start": "2026-11-19",
+      "end": "2026-12-03",
+      "status": "in-corso",
+      "dependsOn": [
+        "Verifica completezza dati raccolti (riunione)"
       ]
     },
     {
@@ -257,12 +286,27 @@
         "Marco Piantoni"
       ],
       "priority": "alta",
-      "start": "2026-11-20",
-      "end": "2026-12-04",
+      "start": "2026-12-03",
+      "end": "2026-12-17",
       "status": "da-avviare",
       "dependsOn": [
         "Intervista Claudia Sogus (business input)",
-        "Verifica completezza dati raccolti (riunione)"
+        "Deep dive KPI Inventory Sync Time e Order Touch Rate",
+        "Applicazione benchmark ai KPI già calcolati"
+      ]
+    },
+    {
+      "id": "r11",
+      "task": "Call con tutti (meeting di progetto)",
+      "owners": [
+        "Marco Piantoni"
+      ],
+      "priority": "alta",
+      "start": "2026-12-17",
+      "end": "2026-12-17",
+      "status": "da-avviare",
+      "dependsOn": [
+        "Prima analisi dati raccolti"
       ]
     }
   ],
@@ -561,6 +605,18 @@
     }
   ],
   "log": [
+    {
+      "date": "19/11/2026",
+      "text": "Nuova call con tutti fissata per il 17/12/2026. Prima analisi dati raccolti spostata a 03/12–17/12/2026, dopo deep dive e benchmark."
+    },
+    {
+      "date": "19/11/2026",
+      "text": "Aggiunte in roadmap due attività in parallelo, entro il 03/12/2026: deep dive sui KPI Inventory Sync Time (tempo tra vendita e aggiornamento della giacenza esposta) e Order Touch Rate (interventi manuali del customer care); applicazione dei benchmark ai KPI già calcolati (Marco Piantoni + Eugenio Frescura)."
+    },
+    {
+      "date": "19/11/2026",
+      "text": "🔧 Roadmap — \"Verifica completezza dati raccolti (riunione)\": Stato da \"In corso\" a \"Completato\""
+    },
     {
       "date": "19/11/2026",
       "text": "🔧 KPI — scadenze aggiornate al 19/11/2026 (riunione di verifica completezza dati) per 9 KPI, in precedenza WK31/WK35. Al 12/11 numeri disponibili per tutti i KPI richiesti tranne 2."
