@@ -20,9 +20,9 @@
       "kpi": "Inventory Sync Time",
       "formula": "Tempo (media + p95) tra vendita/reso e aggiornamento stock pubblicato su .com/MKT",
       "fonte": "OMS log",
-      "baseline": "",
+      "baseline": "Da calcolare (deep dive)",
       "target": "",
-      "deadline": "19/11/2026",
+      "deadline": "03/12/2026",
       "owners": [
         "Marco Benasedo",
         "Raul Simon"
@@ -103,9 +103,9 @@
       "kpi": "Order Touch Rate",
       "formula": "N. ordini bloccati/modificati manualmente nel giorno / Tot. ordini gestiti dall'OMS",
       "fonte": "OMS",
-      "baseline": "",
+      "baseline": "Da calcolare (deep dive)",
       "target": "",
-      "deadline": "19/11/2026",
+      "deadline": "03/12/2026",
       "owners": [
         "Marco Benasedo",
         "Raul Simon",
@@ -605,6 +605,10 @@
     }
   ],
   "log": [
+    {
+      "date": "19/11/2026",
+      "text": "🔧 KPI — segnati come mancanti (numeri non ancora disponibili) Inventory Sync Time e Order Touch Rate: baseline \"Da calcolare (deep dive)\", scadenza 03/12/2026."
+    },
     {
       "date": "19/11/2026",
       "text": "Nuova call con tutti fissata per il 17/12/2026. Prima analisi dati raccolti spostata a 03/12–17/12/2026, dopo deep dive e benchmark."
