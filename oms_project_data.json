@@ -230,7 +230,7 @@
       "priority": "alta",
       "start": "2026-10-29",
       "end": "2026-10-29",
-      "status": "da-avviare",
+      "status": "completato",
       "dependsOn": [
         "Call con BI: studio dettagli calcolo KPI"
       ]
@@ -561,6 +561,10 @@
     }
   ],
   "log": [
+    {
+      "date": "19/11/2026",
+      "text": "🔧 Roadmap — \"Aggiornamento con BI sul calcolo KPI\": Stato da \"Da avviare\" a \"Completato\""
+    },
     {
       "date": "13/11/2026",
       "text": "Il prossimo meeting con tutti i partecipanti al progetto è fissato per il 19/11/2026."
